@@ -10,7 +10,7 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@TeleOp(name="West Cost Drive - Tank", group="Linear Opmode")
+@TeleOp(name="West Cost Drive - Tank", group="none")
 //@Disabled
 public class TankDrive extends LinearOpMode {
 
