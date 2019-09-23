@@ -10,9 +10,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 
-@TeleOp(name="Practice Drive Train", group="Linear Opmode")
+@TeleOp(name="West Cost Drive - Tank", group="Linear Opmode")
 //@Disabled
-public class DriveTrainPracticeCode extends LinearOpMode {
+public class TankDrive extends LinearOpMode {
 
     private DcMotor leftMotor1;
     private DcMotor leftMotor2;
@@ -31,18 +31,18 @@ public class DriveTrainPracticeCode extends LinearOpMode {
 
         waitForStart();
         while(opModeIsActive()) {
-            if(Math.abs(gamepad1.left_stick_y) < 0.15) {
+            if(Math.abs(-gamepad1.left_stick_y) < 0.15) {
                 setLeftPower(0);
             }
             else {
-                setLeftPower(gamepad1.left_stick_y);
+                setLeftPower(-gamepad1.left_stick_y);
             }
 
-            if(Math.abs(gamepad1.right_stick_y) < 0.15) {
+            if(Math.abs(-gamepad1.right_stick_y) < 0.15) {
                 setRightPower(0);
             }
             else {
-                setRightPower(gamepad1.right_stick_y);
+                setRightPower(-gamepad1.right_stick_y);
             }
         }
 

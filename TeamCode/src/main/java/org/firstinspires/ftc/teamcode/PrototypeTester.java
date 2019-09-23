@@ -30,7 +30,7 @@ public class PrototypeTester extends LinearOpMode {
     //color sensor arm
 
     @Override
-    public void runOpMode() {
+    public void runOpMode() throws InterruptedException {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -58,17 +58,17 @@ public class PrototypeTester extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if(Math.abs(gamepad1.left_stick_y) < 0.15){
+            if(Math.abs(-gamepad1.left_stick_y) < 0.15){
                 setLeftPower(0);
             }
             else {
-                setLeftPower(gamepad1.left_stick_y);
+                setLeftPower(-gamepad1.left_stick_y);
             }
-            if(Math.abs(gamepad1.right_stick_y) < 0.15){
+            if(Math.abs(-gamepad1.right_stick_y) < 0.15){
                 setRightPower(0);
             }
             else{
-                setRightPower(gamepad1.right_stick_y);
+                setRightPower(-gamepad1.right_stick_y);
             }
 
             if (!prevPos && gamepad1.x) {
