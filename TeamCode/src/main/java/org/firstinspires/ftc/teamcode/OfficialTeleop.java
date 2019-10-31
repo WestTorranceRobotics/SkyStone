@@ -30,18 +30,16 @@
 package org.firstinspires.ftc.teamcode;
 
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.westtorrancerobotics.lib.hardware.MecanumController;
-import org.westtorrancerobotics.lib.hardware.MecanumDrive;
+import org.westtorrancerobotics.lib.MecanumController;
+import org.westtorrancerobotics.lib.MecanumDrive;
 
-@TeleOp(name="Two Drivers", group="Iterative Opmode")
+@TeleOp(name="Two Drivers", group="none")
 //@Disabled
 public class OfficialTeleop extends OpMode
 {
@@ -56,7 +54,9 @@ public class OfficialTeleop extends OpMode
     private MecanumController driveTrain;
 
     private DcMotorEx lift;
-    private float liftLevel;
+    private int liftLevel;
+    private int LEVEL_HEIGHT = 300; // ticks per lift level
+    private int liftOffset;
     private int lastDpad;
     private long dPadDebounce;
     private final int MAX_LIFT_HEIGHT = 4;
@@ -69,13 +69,15 @@ public class OfficialTeleop extends OpMode
     @Override
     public void init() {
 
+        runtime = new ElapsedTime();
+
         telemetry.addData("Status", "Initializing...");
         telemetry.update();
 
         leftFront  = hardwareMap.get(DcMotorEx.class, "leftFront");
-        leftBack  = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftBack  = hardwareMap.get(DcMotorEx.class, "leftBack");
         rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
-        rightBack = hardwareMap.get(DcMotorEx.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
 
         leftFront.setDirection(DcMotor.Direction.FORWARD);
         leftBack.setDirection(DcMotor.Direction.FORWARD);
@@ -87,8 +89,10 @@ public class OfficialTeleop extends OpMode
         rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        MecanumDrive drive = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack, gyro);
-        driveTrain = new MecanumController(drive);
+        gyro = hardwareMap.get(ModernRoboticsI2cGyro.class, "gyro");
+
+        MecanumDrive train = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack, gyro);
+        driveTrain = new MecanumController(train);
 
 
         lift = hardwareMap.get(DcMotorEx.class, "lift");
@@ -127,8 +131,12 @@ public class OfficialTeleop extends OpMode
         lift.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         lift.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         liftLevel = 0;
+        liftOffset = 0;
         lastDpad = 0;
-        dPadDebounce = -250;
+        dPadDebounce = -50;
+
+        gyro.calibrate();
+        driveTrain.zeroDeadReckoner();
 
         telemetry.addData("Status", "Lift Initialized.");
         telemetry.update();
@@ -141,12 +149,16 @@ public class OfficialTeleop extends OpMode
     @Override
     public void loop() {
 
-        double turn = -gamepad1.left_stick_y - -gamepad1.right_stick_y;
-        double y = (-gamepad1.left_stick_y + -gamepad1.right_stick_y) / 2;
-        double x = (gamepad1.left_stick_x + gamepad1.right_stick_x) / 2;
+        if (driveTrain.isGyroCalibrating()) {
+            return;
+        }
+
+        double turn = deadZone(-deadZone(gamepad1.left_stick_y) - -deadZone(gamepad1.right_stick_y));
+        double y = deadZone(-deadZone(gamepad1.left_stick_y) + -deadZone(gamepad1.right_stick_y)) / 2;
+        double x = deadZone(deadZone(gamepad1.left_stick_x) + deadZone(gamepad1.right_stick_x)) / 2;
         driveTrain.spinDrive(x, y, turn, MecanumDrive.TranslTurnMethod.EQUAL_SPEED_RATIOS);
 
-        if (runtime.milliseconds() - dPadDebounce > 250) {
+        if (runtime.milliseconds() - dPadDebounce > 50) {
             int dpad = (gamepad2.dpad_up ? 1 : 0) - (gamepad2.dpad_down ? 1 : 0);
             if (dpad != lastDpad && dpad != 0) {
                 liftLevel += dpad;
@@ -160,10 +172,13 @@ public class OfficialTeleop extends OpMode
             lastDpad = dpad;
         }
 
-        lift.setTargetPosition((int) (liftLevel * 300));
+        lift.setTargetPosition((liftLevel * LEVEL_HEIGHT) + liftOffset);
+
+        driveTrain.updateLocation();
 
         telemetry.addData("Drive", "x:%f, y:%f, turn:%f", x, y, turn);
         telemetry.addData("Lift level", Math.round(liftLevel));
+        telemetry.addData("Drive Base Location", driveTrain.getLocation());
 
     }
 
@@ -172,6 +187,10 @@ public class OfficialTeleop extends OpMode
      */
     @Override
     public void stop() {
+    }
+
+    private double deadZone(double original) {
+        return Math.abs(original) < 0.12 ? 0 : original;
     }
 
 }
