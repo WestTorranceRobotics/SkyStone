@@ -10,9 +10,9 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 //import com.qualcomm.robotcore.hardware.ColorSensor;
 
-@TeleOp(name="Mecanum TeleOp", group="Linear Opmode")
+@TeleOp(name="Mecanum Teleop", group="Linear Opmode")
 //@Disabled
-public class MecanumTeleOp extends LinearOpMode {
+public class MecanumTeleop extends LinearOpMode {
 
     // Declare OpMode members
     private ElapsedTime runtime = new ElapsedTime();
@@ -44,15 +44,15 @@ public class MecanumTeleOp extends LinearOpMode {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        left1 = hardwareMap.dcMotor.get("leftFront/odometerLeftY");
+        left1 = hardwareMap.dcMotor.get("leftFront");
         left2 = hardwareMap.dcMotor.get("leftBack");
-        right1 = hardwareMap.dcMotor.get("rightFront/odometerRightY");
-        right2 = hardwareMap.dcMotor.get("rightBack/odometerX");
+        right1 = hardwareMap.dcMotor.get("rightFront");
+        right2 = hardwareMap.dcMotor.get("rightBack");
 
-        intakeLeft = hardwareMap.dcMotor.get("intakeLeft");
-        intakeRight = hardwareMap.dcMotor.get("intakeRight");
+        intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
+        intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
 
-        liftRight = hardwareMap.dcMotor.get("liftRight");
+        liftRight = hardwareMap.dcMotor.get("liftRight/odometerX");
         liftLeft = hardwareMap.dcMotor.get("liftLeft");
 
         grabLeft = hardwareMap.servo.get("grabLeft");
@@ -111,6 +111,7 @@ public class MecanumTeleOp extends LinearOpMode {
             right1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             right2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
+            // TODO fix the intake speeds (problem is here) for meet 1
             if (gamepad2.right_bumper) {
                 intakeLeft.setPower(1);
                 intakeRight.setPower(1);
