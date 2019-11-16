@@ -9,6 +9,8 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.teamcode.subsystems.StoneManipulator;
+
 //import com.qualcomm.robotcore.hardware.ColorSensor;
 
 @TeleOp(name="Mecanum Teleop", group="Linear Opmode")
@@ -27,6 +29,9 @@ public class MecanumTeleop extends LinearOpMode {
     private DcMotor intakeRight;
     private CRServo outtakeLeft;
     private CRServo outtakeRight;
+
+    private Servo nubBig;
+    private Servo nubLittle;
 
     private Servo grabRight;
     private Servo grabLeft;
@@ -47,8 +52,13 @@ public class MecanumTeleop extends LinearOpMode {
         grabLeft = hardwareMap.servo.get("foundationHookLeft");
         grabRight = hardwareMap.servo.get("foundationHookRight");
 
+        nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
+        nubLittle = hardwareMap.get (Servo.class, "nugGrabLittle");
+
         outtakeLeft = hardwareMap.crservo.get("outtakeLeft");
         outtakeRight = hardwareMap.crservo.get("outtakeRight");
+
+
 
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -100,13 +110,11 @@ public class MecanumTeleop extends LinearOpMode {
 
             if (gamepad2.right_bumper) {
                 intakeSpeed = 1;
-                outtakeSpeed = .75;
             }
 
-            if (gamepad2.left_bumper) {
-                intakeSpeed = -1;
-                outtakeSpeed = -0.75;
-            }
+            if (gamepad2.dpad_right) {
+                outtakeSpeed = -.75;
+            } else if (gamepad2.dpad_left) { outtakeSpeed = .75;} else { outtakeSpeed = 0;}
             intakeLeft.setPower(intakeSpeed);
             intakeRight.setPower(intakeSpeed);
             outtakeRight.setPower(outtakeSpeed);
@@ -127,6 +135,7 @@ public class MecanumTeleop extends LinearOpMode {
                 prevPos = false;
             }
         }
+        if (gamepad2.a) {nubBig.setPosition(.9); nubLittle.setPosition(.9);} else if (gamepad2.b) {nubBig.setPosition(.4); nubLittle.setPosition(.4);}
     }
 
     void setLeft2Power(double n){

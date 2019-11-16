@@ -47,6 +47,7 @@ import org.westtorrancerobotics.lib.Location;
 public class OfficialTeleop extends OpMode {
 
     private Robot robot;
+    private boolean blockGrabbed = false;
 
     private boolean foundationGrabbed;
 
@@ -138,6 +139,7 @@ public class OfficialTeleop extends OpMode {
         whenReleasedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(0), 3);
         whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(-1), 4);
         whenReleasedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(0), 5);
+
         whenPressedDebounce(() -> gamepad2.x, () -> {
             foundationGrabbed = !foundationGrabbed;
             robot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, foundationGrabbed);
