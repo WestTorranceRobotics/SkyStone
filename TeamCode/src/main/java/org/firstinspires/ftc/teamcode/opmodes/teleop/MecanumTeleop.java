@@ -68,7 +68,7 @@ public class MecanumTeleop extends LinearOpMode {
         grabRight = hardwareMap.servo.get("foundationHookRight");
 
         nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
-        nubLittle = hardwareMap.get (Servo.class, "nugGrabLittle");
+        nubLittle = hardwareMap.get (Servo.class, "nubGrabLittle");
 
         outtakeLeft = hardwareMap.crservo.get("outtakeLeft");
         outtakeRight = hardwareMap.crservo.get("outtakeRight");
