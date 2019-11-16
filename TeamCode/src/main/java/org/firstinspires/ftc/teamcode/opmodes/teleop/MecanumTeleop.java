@@ -2,6 +2,7 @@ package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
+import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
@@ -26,11 +27,11 @@ public class MecanumTeleop extends LinearOpMode {
 
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
-    private Servo outtakeLeft;
-    private Servo outtakeRight;
-
-    private DcMotor liftRight;
+    private CRServo outtakeLeft;
+    private CRServo outtakeRight;
     private DcMotor liftLeft;
+    private DcMotor liftRight;
+
 
     private Servo grabRight;
     private Servo grabLeft;
@@ -55,20 +56,28 @@ public class MecanumTeleop extends LinearOpMode {
         liftRight = hardwareMap.dcMotor.get("liftRight/odometerX");
         liftLeft = hardwareMap.dcMotor.get("liftLeft");
 
-        grabLeft = hardwareMap.servo.get("grabLeft");
-        grabRight = hardwareMap.servo.get("grabRight");
+        grabLeft = hardwareMap.servo.get("foundationHookLeft");
+        grabRight = hardwareMap.servo.get("foundationHookRight");
+
+        outtakeLeft = hardwareMap.crservo.get("outtakeLeft");
+        outtakeRight = hardwareMap.crservo.get("outtakeRight");
+
+        int leftOdo = intakeLeft.getCurrentPosition();
+        int rightOdo = intakeRight.getCurrentPosition();
+        int alignOdo = liftRight.getCurrentPosition();
 
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
+        liftLeft.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        left1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        right1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -95,8 +104,6 @@ public class MecanumTeleop extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            telemetry.update();
-
             float vertical = -(gamepad1.left_stick_y);
             float horizontal = gamepad1.left_stick_x;
             float pivot = gamepad1.right_stick_x;
@@ -111,30 +118,58 @@ public class MecanumTeleop extends LinearOpMode {
             right1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             right2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            // TODO fix the intake speeds (problem is here) for meet 1
+            telemetry.addData("leftOdo", leftOdo);
+            telemetry.addData("rightOdo", rightOdo);
+            telemetry.addData("alignOdo", alignOdo);
+
+            int intakeSpeed = 0;
+            double outtakeSpeed = 0;
+
             if (gamepad2.right_bumper) {
-                intakeLeft.setPower(1);
-                intakeRight.setPower(1);
-                telemetry.addData("intakeLeft", intakeLeft);
-                telemetry.addData("intakeRight", intakeRight);
-            } else {
-                intakeRight.setPower(0);
-                intakeLeft.setPower(0);
+                intakeSpeed = 1;
+                outtakeSpeed = .75;
             }
 
             if (gamepad2.left_bumper) {
-                intakeLeft.setPower(-1);
-                intakeRight.setPower(-1);
-                telemetry.addData("intakeLeft", intakeLeft);
-                telemetry.addData("intakeRight", intakeRight);
-            } else {
-                intakeRight.setPower(0);
-                intakeLeft.setPower(0);
+                intakeSpeed = -1;
+                outtakeSpeed = -0.75;
             }
+            intakeLeft.setPower(intakeSpeed);
+            intakeRight.setPower(intakeSpeed);
+            outtakeRight.setPower(outtakeSpeed);
+            outtakeLeft.setPower(outtakeSpeed);
 
-            telemetry.addData("right", grabRight.getPosition());
-            telemetry.addData("left", grabRight.getPosition());
-            telemetry.update();
+//            telemetry.addData("outtake speed R", outtakeRight.getPower());
+//            telemetry.addData("outtake speed L", outtakeLeft.getPower());
+//            telemetry.update();
+
+           if (gamepad2.dpad_up) {
+                liftLeft.setPower(.75);
+                liftRight.setPower(.75);
+           }
+           else if (gamepad2.dpad_down) {
+                liftRight.setPower(-.25);
+                liftLeft.setPower(-.25);
+           }
+           else {
+               liftRight.setPower(-.33);
+               liftLeft.setPower(.33);
+           }
+
+
+
+//            double liftSpeed = .2;
+//
+//            if (gamepad2.dpad_up) {
+//                liftSpeed = -.75;
+//            }
+//            if (gamepad2.dpad_down) {
+//                liftSpeed =
+//            }
+
+//            telemetry.addData("right", grabRight.getPosition());
+//            telemetry.addData("left", grabRight.getPosition());
+//            telemetry.update();
 
             if (!prevPos && gamepad2.x) {
                 if (!pos) {

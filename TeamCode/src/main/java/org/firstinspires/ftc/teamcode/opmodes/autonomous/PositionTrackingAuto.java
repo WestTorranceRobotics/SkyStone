@@ -15,44 +15,73 @@ import static java.lang.Math.sqrt;
 @Autonomous(name="Position Tracking", group="Linear Opmode")
 public class PositionTrackingAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
-    // defining front left wheel
+
     private DcMotor left1;
-    // defining back left wheel
     private DcMotor left2;
-    // defining front right wheel
     private DcMotor right1;
-    // defining back right wheel
     private DcMotor right2;
 
-    private DcMotor leftOdo;
-    // only for encoder use
-    private DcMotor rightOdo;
-    // only for encoder use
-    private DcMotor alignOdo;
-    // only for encoder alignment
+    private ColorSensor color;
+
+    private DcMotor intakeLeft;
+    private DcMotor intakeRight;
+    private Servo outtakeLeft;
+    private Servo outtakeRight;
+
+    private DcMotor liftRight;
+    private DcMotor liftLeft;
+
+    private Servo grabRight;
+    private Servo grabLeft;
+
+    private Servo nubGrabRight;
+
+    private Servo nubGrabLeft;
 
     @Override
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
-        left1 = hardwareMap.dcMotor.get("left1");
-        left2 = hardwareMap.dcMotor.get("left2");
-        right1 = hardwareMap.dcMotor.get("right1");
-        right2 = hardwareMap.dcMotor.get("right2");
+        left1 = hardwareMap.dcMotor.get("leftFront");
+        left2 = hardwareMap.dcMotor.get("leftBack");
+        right1 = hardwareMap.dcMotor.get("rightFront");
+        right2 = hardwareMap.dcMotor.get("rightBack");
 
-        int leftOdo = left1.getCurrentPosition();
-        int rightOdo = left2.getCurrentPosition();
-        int alignOdo = right1.getCurrentPosition();
+        intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
+        intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
+
+        liftRight = hardwareMap.dcMotor.get("liftRight/odometerX");
+        liftLeft = hardwareMap.dcMotor.get("liftLeft");
+
+        grabLeft = hardwareMap.servo.get("grabLeft");
+        grabRight = hardwareMap.servo.get("grabRight");
+
+        int leftOdo = intakeLeft.getCurrentPosition();
+        int rightOdo = intakeRight.getCurrentPosition();
+        int alignOdo = liftRight.getCurrentPosition();
 
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        right1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        right1.setDirection(DcMotorSimple.Direction.REVERSE);
-        right2.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        intakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
 
@@ -70,6 +99,11 @@ public class PositionTrackingAuto extends LinearOpMode {
     double conversion = numOfTicks / (wheelDiameter * pi);
 
     void odomTutorial (int x, int y){
+
+        int leftOdo = intakeLeft.getCurrentPosition();
+        int rightOdo = intakeRight.getCurrentPosition();
+        int alignOdo = liftRight.getCurrentPosition();
+
         int initialX = 0;
         int initialY = 0;
         int initialTheta = 0;
@@ -77,13 +111,12 @@ public class PositionTrackingAuto extends LinearOpMode {
         double diagonalMovement = sqrt((x * x) + (y * y));
         double ticksMovement = diagonalMovement * conversion;
 
-        int currentLeftPos = leftOdo.getCurrentPosition();
-        int currentRightPos = rightOdo.getCurrentPosition();
-        int currentAlignPos = alignOdo.getCurrentPosition();
+        int currentLeftPos = leftOdo;
+        int currentRightPos = rightOdo;
+        int currentAlignPos = alignOdo;
 
         double targetLeftPos = ticksMovement + currentLeftPos;
         double targetRightPos = ticksMovement + currentRightPos;
-
 
         //If x is less than 0;
         if (x < 0 && y > 0){
