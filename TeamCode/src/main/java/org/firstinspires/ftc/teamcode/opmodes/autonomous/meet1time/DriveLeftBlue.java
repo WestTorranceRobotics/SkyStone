@@ -20,9 +20,9 @@ public class DriveLeftBlue extends OpMode {
     @Override
     public void loop() {
         if (bot.driveTrain.onBlueLine() || saw) {
-            bot.driveTrain.spinDrive(-0.5, 0, 0);
+            bot.driveTrain.spinDrive(0, 0, 0);
         } else {
-            bot.driveTrain.spinDrive(0,0,0);
+            bot.driveTrain.spinDrive(-0.5,0,0);
         }
     }
 }
