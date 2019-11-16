@@ -21,8 +21,6 @@ public class Test extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
-    private PositionTrackingAuto tracking = new PositionTrackingAuto();
-
     FoundationGrabber grab;
     DriveTrain train;
     // defining back right wheel

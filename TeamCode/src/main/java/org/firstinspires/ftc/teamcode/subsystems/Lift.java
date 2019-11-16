@@ -19,23 +19,10 @@ public class Lift {
     private long encoderZero;
     private long encoderTarget;
     private int level;
-    private final int LEVEL_HEIGHT = (int) (4 * TICKS_PER_INCH);
     private final int MAX_LEVEL = 4;
     //private ElapsedTime runtime = new ElapsedTime();
     //private double integral = 0;
     private double FEEDFORWARD = .33;
-
-    private double P;
-    private double I;
-    private double D;
-    private double F;
-
-    private PidfController velocityControl;
-    private DoubleUnaryOperator velocityProfile;
-    private ElapsedTime velocityProfileTimer;
-    private double velocityProfileDuration;
-
-    private State state;
 
     private static Lift instance = null;
 
@@ -71,38 +58,13 @@ public class Lift {
         bottomLimit = hardwareMap.get(RevTouchSensor.class, "liftLimitSwitch");
         level = 0;
 
-        velocityControl = new PidfController(() -> P, () -> I, () -> D, (pos) -> F);
-        double cpsMax = SPEED * TICKS_PER_INCH;
-        velocityControl.setOutputRange(-cpsMax, cpsMax);
-        velocityProfileTimer = new ElapsedTime();
-
         hadBlock = false;
+    }
 
     public void idle() {
-        if (ButtonAndEncoderData.getLatest().isPressed(bottomLimit)) {
-            if (state != State.IDLING) {
-                leftMotor.setPower(IDLE_POWER);
-                rightMotor.setPower(IDLE_POWER);
-                rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                state = State.IDLING;
-            }
-        } else {
-            if (state != State.OFF) {
-                leftMotor.setPower(0);
-                rightMotor.setPower(0);
-                state = State.OFF;
-            }
-        }
     }
 
     public void zero() {
-        encoderZero = ButtonAndEncoderData.getLatest().getCurrentPosition(leftMotor);
-        leftMotor.setPower(0);
-        rightMotor.setPower(0);
-        leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
-        state = State.OFF;
     }
 
     public void setLevel(int level) {
@@ -116,9 +78,6 @@ public class Lift {
             return;
         }
         this.level = level;
-        encoderTarget = level * LEVEL_HEIGHT + encoderZero;
-        makeVelocityFunction(encoderTarget);
-        state = State.MOVING;
     }
 
     public int getLevel() {
@@ -134,33 +93,6 @@ public class Lift {
     }
 
     public void updatePosition() {
-        double output = Double.NaN;
-        if ((level == 0 && ButtonAndEncoderData.getLatest().isPressed(bottomLimit)) || velocityProfile == null) {
-            if (state == State.OFF) {
-                return;
-            }
-            if (ButtonAndEncoderData.getLatest().getCurrentVelocity(leftMotor)
-                    > (SAFE_TO_OFF_VELOCITY / TICKS_PER_INCH)) {
-                output = velocityControl.getOutput(
-                        ButtonAndEncoderData.getLatest().getCurrentVelocity(leftMotor),
-                        0
-                );
-            } else {
-                leftMotor.setPower(0);
-                rightMotor.setPower(0);
-                state = State.OFF;
-                return;
-            }
-        }
-        if (Double.isNaN(output)) {
-            output = velocityControl.getOutput(
-                    ButtonAndEncoderData.getLatest().getCurrentVelocity(leftMotor),
-                    velocityProfile.applyAsDouble(velocityProfileTimer.seconds())
-            );
-        }
-        state = profileFinished() ? State.IDLING : State.MOVING;
-        leftMotor.setPower(output);
-        rightMotor.setPower(output);
     }
 
     public boolean hasBlock() {

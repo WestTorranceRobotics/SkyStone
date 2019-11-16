@@ -95,7 +95,6 @@ public class OdometryAuto extends LinearOpMode {
 
 
         straightMovement(15, 1, 1, 1, 1);
-        tracking.odomTutorial(1,1);
         sideToSide(5,1,-1,-1,1);
 
 

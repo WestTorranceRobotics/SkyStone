@@ -16,8 +16,6 @@ public class NewTest extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
-    private PositionTrackingAuto tracking = new PositionTrackingAuto();
-
     FoundationGrabber grab;
     Robot bot;
     // defining back right wheel
