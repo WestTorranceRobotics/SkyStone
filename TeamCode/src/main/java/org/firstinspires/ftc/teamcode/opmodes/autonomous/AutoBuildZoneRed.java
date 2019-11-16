@@ -14,7 +14,7 @@ import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.R
 import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.BOTH;
 
 @Disabled
-@Autonomous(name = "Red Build Zone", group = "none")
+//@Autonomous(name = "Red Build Zone", group = "none")
 public class AutoBuildZoneRed extends LinearOpMode {
         @Override
     public void runOpMode() throws InterruptedException {
