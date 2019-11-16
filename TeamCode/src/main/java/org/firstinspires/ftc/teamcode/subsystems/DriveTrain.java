@@ -21,8 +21,8 @@ public class DriveTrain {
     private MecanumController mecanumController;
 
     public ColorSensor lineSpotter;
-    private static final int RED_THRESHOLD  = 5;
-    private static final int BLUE_THRESHOLD = 5;
+    private static final int RED_THRESHOLD  = 1800;
+    private static final int BLUE_THRESHOLD = 2000;
 
     private Odometer odometer;
 
