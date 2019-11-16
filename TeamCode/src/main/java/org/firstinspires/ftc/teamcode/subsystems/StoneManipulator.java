@@ -3,61 +3,110 @@ import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.qualcomm.robotcore.hardware.TouchSensor;
+/**
+ * Code for the following systems:
+ * intake
+ * extender
+ * nub grabber
+ *
+ *
+ *
+ * FORWARD AND BACKWARD GRASPED/UNCLASPED POSITIONS MUST BE ADJUSTED FOR THE FORWARD AND BACKWARD GRAB ARMS
+ **/
 public class StoneManipulator {
     private static StoneManipulator instance = null;
-    private CRServo outtakeRight;
-    private CRServo outtakeLeft;
+    // limits maximum movement of extender
+    private TouchSensor extenderForwardLimit;
+    // limits minimum movement of extender
+    private TouchSensor extenderReverseLimit;
+    //private CRServo outtakeRight;
+    //private CRServo outtakeLeft;
+    private boolean clasped;
     private Servo stoneGrabBig;
     private Servo stoneGrabLittle;
     private DcMotor rightIntake;
     private DcMotor leftIntake;
-    private final double FORWARD_GRABBER_CLASPED_POSITION = .9;
-    private final double FORWARD_GRABBER_UNCLASPED_POSITION = .4;
-    private final double BACKWARD_GRABBER_CLASPED_POSITION = .9;
-    private final double BACKWARD_GRABBER_UNCLASPED_POSITION = .4;
+    private final double FORWARD_GRABBER_CLASPED_POSITION = .4;
+    private final double FORWARD_GRABBER_UNCLASPED_POSITION = .9;
+    private final double BACKWARD_GRABBER_CLASPED_POSITION = .4;
+    private final double BACKWARD_GRABBER_UNCLASPED_POSITION = .9;
     private State currentState;
     public static synchronized StoneManipulator getInstance() {
         return instance != null ? instance : (instance = new StoneManipulator());
     }
+    /**
+     * Initializes hardware.
+     *
+     * Clasped/unclasped positions set the maximum ranges for the nub grabber servers.
+     * Robot moves on initialization.
+     *
+     **/
     public void init(HardwareMap hardwareMap) {
+        extenderForwardLimit = hardwareMap.get(TouchSensor.class, "extenderForwardLimit");
+        extenderReverseLimit = hardwareMap.get(TouchSensor.class, "extenderReverseLimit");
         rightIntake = hardwareMap.get(DcMotor.class, "intakeRight/odometerRightY");
         leftIntake = hardwareMap.get(DcMotor.class, "intakeLeft/odometerLeftY");
-//        stoneGrabBig = hardwareMap.get(Servo.class, "nubGrabBig");
-//        stoneGrabLittle = hardwareMap.get(Servo.class, "nubGrabLittle");
-//        outtakeRight = hardwareMap.get(CRServo.class, "outtakeRight");
-//        outtakeLeft = hardwareMap.get(CRServo.class, "outtakeLeft");
-//        stoneGrabBig.scaleRange(FORWARD_GRABBER_UNCLASPED_POSITION,FORWARD_GRABBER_CLASPED_POSITION);
-//        stoneGrabLittle.scaleRange(BACKWARD_GRABBER_UNCLASPED_POSITION,BACKWARD_GRABBER_CLASPED_POSITION);
-//        stoneGrabBig.setPosition(0);
-//        stoneGrabLittle.setPosition(0);
-        leftIntake.setDirection(DcMotor.Direction.REVERSE);
-    }
+        stoneGrabBig = hardwareMap.get(Servo.class, "nubGrabBig");
+        stoneGrabLittle = hardwareMap.get(Servo.class, "nubGrabLittle");
+       //outtakeRight = hardwareMap.get(CRServo.class, "outtakeRight");
+        //outtakeLeft = hardwareMap.get(CRServo.class, "outtakeLeft");
+        stoneGrabBig.scaleRange(FORWARD_GRABBER_UNCLASPED_POSITION,FORWARD_GRABBER_CLASPED_POSITION);
+        stoneGrabLittle.scaleRange(BACKWARD_GRABBER_CLASPED_POSITION,BACKWARD_GRABBER_UNCLASPED_POSITION);
+        stoneGrabBig.setPosition(0);
+        stoneGrabLittle.setPosition(0);
+        leftIntake.setDirection(DcMotor.Direction.REVERSE); }
+    /**
+     * Sets the power of the intake
+     *
+     * if state is EXTENDED, returns EXTENDED, otherwise returns INTAKING unless power is 0
+     *
+     * */
     public State setIntake (double power) {
-        power = (currentState==State.CLASPING) ? 0 : power;
+        if (currentState == State.EXTENDED) {return currentState;}
         leftIntake.setPower(power);
         rightIntake.setPower(power);
-        currentState = (power>0 || power<0) ? State.INTAKEMOVING : (power==0) ? State.INTAKESTOPPED : State.INTAKESTOPPED;
-        return currentState;
-    } public State setOuttake (double power) {
-        power = (currentState==State.UNCLASPED) ? 0 : power;
-        outtakeRight.setPower(power);
-        outtakeLeft.setPower(power);
-        currentState = (power>0 || power<0) ? State.SLIDEMOVING : (power == 0) ? State.SLIDESTOPPED: State.SLIDESTOPPED;
-        return currentState;
-    } public State setStoneGrabber (double position) {
-        stoneGrabBig.setPosition(position);
-        stoneGrabLittle.setPosition(position);
-        currentState = (stoneGrabLittle.getPosition()< position && stoneGrabBig.getPosition()< position) ? State.CLASPING : State.UNCLASPED;
-        return currentState;
-    } public State getState() {
+        currentState = (power != 0) ? State.INTAKING : (power==0) ? State.RESTING: currentState;
         return currentState;
     }
+
+    /**
+     *
+     * Sets if outtake is extended or not
+     *
+     *
+     *
+     * if intaking, return intaking, otherwise return extended lest power is 0
+     * @param extended
+     * @return
+     */
+    public State setExtended (boolean extended) {
+       /* if (currentState == State.INTAKING) {return currentState;}
+        double power = 1;
+        power = (!extended) ? -power : power;
+        outtakeRight.setPower(power);
+        outtakeLeft.setPower(power);
+        while (power != 0) {
+            outtakeRight.setPower (extenderForwardLimit.isPressed() ? 0 : extenderReverseLimit.isPressed() ? 0 : power);
+            outtakeLeft.setPower (extenderForwardLimit.isPressed() ? 0 : extenderReverseLimit.isPressed() ? 0 : power);
+        }
+        currentState = (power !=0) ? State.EXTENDED: (power == 0) ? State.RESTING : currentState;*/
+        return currentState;
+     } public boolean setGrabbed (boolean grabbed) {
+       double positionArmBig = grabbed ? FORWARD_GRABBER_CLASPED_POSITION : FORWARD_GRABBER_UNCLASPED_POSITION;
+       double positionArmLittle = grabbed ? BACKWARD_GRABBER_CLASPED_POSITION : BACKWARD_GRABBER_UNCLASPED_POSITION;
+       clasped = (grabbed) ? true : false;
+        stoneGrabBig.setPosition(positionArmBig);
+        stoneGrabLittle.setPosition(positionArmLittle);
+        return clasped;
+    } public State getState() {
+        return currentState;
+    } public boolean isGrabbed () {
+        return (clasped);
+    }
     public enum State {
-        INTAKEMOVING,
-        INTAKESTOPPED,
-        SLIDEMOVING,
-        SLIDESTOPPED,
-        CLASPING,
-        UNCLASPED,
+        RESTING,
+        EXTENDED,
+        INTAKING,
     }
 }

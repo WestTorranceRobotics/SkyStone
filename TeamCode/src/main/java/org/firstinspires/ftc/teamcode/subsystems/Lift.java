@@ -10,9 +10,7 @@ import com.qualcomm.robotcore.hardware.PIDFCoefficients;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
-
 public class Lift {
-
     private DcMotorEx leftMotor;
     private DcMotorEx rightMotor;
     private RevColorSensorV3 blockDetector;
@@ -22,6 +20,21 @@ public class Lift {
     private int level;
     private final int LEVEL_HEIGHT = 300; // ticks per lift level
     private final int MAX_LEVEL = 4;
+    //private ElapsedTime runtime = new ElapsedTime();
+    //private double integral = 0;
+    private double FEEDFORWARD = .33;
+  /*  private final double Kp = .2;
+    private final double Ki = 1;
+    private final double Kd = 1;
+    private final double LEVEL_0 = 0;
+    private final double LEVEL_1 = 125;
+    private final double LEVEL_2 = 275;
+    private final double LEVEL_3 = 450;
+    private final double LEVEL_4 = 690;*/
+    //private final double MAX_SPEED = 23.48;
+    //private final double Ktemp = MAX_SPEED;
+    //private double feed = 0;
+
 
     private static Lift instance = null;
 
@@ -32,6 +45,8 @@ public class Lift {
     private Lift() {}
 
     public void init(HardwareMap hardwareMap) {
+        //integral = 0;
+        //runtime.startTime();
         rightMotor = hardwareMap.get(DcMotorEx.class, "liftRight/odometerX");
         rightMotor.setDirection(DcMotor.Direction.FORWARD);
         rightMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -50,14 +65,10 @@ public class Lift {
                 return Math.pow((rawOptical - cParam) / aParam, -bInvParam);
             }
         };
-
         bottomLimit = hardwareMap.get(RevTouchSensor.class, "liftLimitSwitch");
-
         level = 0;
 
         hadBlock = false;
-        setNoBlockPid();
-        updatePid();
         wasIdling = false;
         wasStill = true;
     }
@@ -137,35 +148,62 @@ public class Lift {
         }
     }
 
-    private void setNoBlockPid() {
-        PIDFCoefficients pidfVelocity = leftMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIDFCoefficients pidfPosition = leftMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-        pidfVelocity.f = 0.1;
-        leftMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfVelocity);
-        leftMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfPosition);
-    }
-
-    private void setBlockPid() {
-        PIDFCoefficients pidfVelocity = leftMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER);
-        PIDFCoefficients pidfPosition = leftMotor.getPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION);
-        pidfVelocity.f = 0.1;
-        leftMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidfVelocity);
-        leftMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_TO_POSITION, pidfPosition);
-    }
-
     public boolean hasBlock() {
         return blockDetector.getDistance(DistanceUnit.INCH) < MAX_NO_BLOCK_DIST_IN;
+
+    }
+/*
+    private double pidPos(double currentPos, double targetPos) {
+        //double error = targetPos - currentPos;
+        // if ((error < .1 && error != 0) || (error > .1 && error!= 0)) {error = 0;}
+        //double proportional = error * Kp;
+        //double targetVel = 1 * proportional;
+        return FEEDFORWARD;
+    }*/
+
+
+    //  /* private double pidVel(double initialTime, double targetVel) {
+    //    double currentVel = (leftMotor.getVelocity());
+    //   double error = targetVel - currentVel;
+    // if (targetVel == 0) {error =0;}
+    //if ((error < .1 && error != 0) || (error > .1 && error!= 0)) {error = 0;}
+    // double proportional = error * Kp;
+    //    integral += error * (runtime.time() - initialTime) ;
+    // integral = ( error == 0 ) ? 0 : integral;
+    // double derivative = 0;//error / (runtime.time() - initialTime);
+    //  double feedforward = FEEDFORWARD;
+    // return ((feedforward + proportional > 1) ? 1 : feedforward + proportional);*/
+    //   }
+
+   /* public void pidProcess(int level) {
+        //double initialTime = runtime.time();
+        //  double targetPosition = (level == 0) ? LEVEL_0 :(level == 1) ? LEVEL_1 : (level == 2) ? LEVEL_2 : (level == 3) ? LEVEL_3 : (level == 4) ? LEVEL_4 : 0 ;
+        //double currentPosition = leftMotor.getCurrentPosition();
+        // replace later with limit switch code when switch is ready for use
+        //if (currentPosition <15) {leftMotor.resetDeviceConfigurationForOpMode();}
+        //double targetVel = pidPos(currentPosition, targetPosition);
+        //double power = (pidPos (currentPosition, targetPosition));
+        leftMotor.setPower(FEEDFORWARD);
+        rightMotor.setPower(FEEDFORWARD);
+    }*/
+
+    public void liftMove(double input) {
+        if (input < -.2)  {
+            leftMotor.setPower(.75);
+            rightMotor.setPower(.75);
+        }
+        else if (input > .15)  {
+            leftMotor.setPower(-.05);
+            rightMotor.setPower(-.05);
+        } else if (StoneManipulator.getInstance().isGrabbed()) {
+            rightMotor.setPower(0);
+            leftMotor.setPower(0);}
+        else{
+            leftMotor.setPower(FEEDFORWARD);
+            rightMotor.setPower(FEEDFORWARD);
+        }
+    }
     }
 
-    private void updatePid() {
-        boolean hasBlock = hasBlock();
-        if (hadBlock && !hasBlock) {
-            setNoBlockPid();
-            hadBlock = false;
-        }
-        if (!hadBlock && hasBlock) {
-            setBlockPid();
-            hadBlock = true;
-        }
-    }
-}
+
+

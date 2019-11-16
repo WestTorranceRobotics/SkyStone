@@ -20,7 +20,7 @@ public class DriveTrain {
     private DcMotorEx rightBack;
     private MecanumController mecanumController;
 
-    private ColorSensor lineSpotter;
+    public ColorSensor lineSpotter;
     private static final int RED_THRESHOLD  = 5;
     private static final int BLUE_THRESHOLD = 5;
 

@@ -13,6 +13,9 @@ import java.util.Base64;
 @Autonomous(name="Odometry Auto", group="Linear Opmode")
 public class OdometryAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
+
+    private PositionTrackingAuto tracking = new PositionTrackingAuto();
+
     // defining back right wheel
     private DcMotor left1;
     // defining back left wheel
@@ -62,6 +65,8 @@ public class OdometryAuto extends LinearOpMode {
         right1 = hardwareMap.dcMotor.get("rightFront");
         right2 = hardwareMap.dcMotor.get("rightBack");
 
+
+
         intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
         intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
 
@@ -93,7 +98,13 @@ public class OdometryAuto extends LinearOpMode {
         telemetry.update();
 
 
+
+
         straightMovement(15, 1, 1, 1, 1);
+        tracking.odomTutorial(1,1);
+        sideToSide(5,1,-1,-1,1);
+
+
         //sideToSide(6, 1, -1, -1, 1);
     }
 

@@ -57,6 +57,7 @@ public class FoundationGrabber {
         rightHook = hardwareMap.get(Servo.class, "foundationHookRight");
         rightBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchRight");
 
+
         rightEye = new RevColorSensorV3(
                 hardwareMap.get(RevColorSensorV3.class, "ssColorRight").getDeviceClient()
         ) {

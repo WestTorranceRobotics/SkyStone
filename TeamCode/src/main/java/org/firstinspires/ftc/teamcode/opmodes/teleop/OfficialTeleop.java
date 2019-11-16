@@ -124,16 +124,20 @@ public class OfficialTeleop extends OpMode {
      */
     @Override
     public void loop() {
-
-//        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
-//        data.clear();
-//        data.addHubData(robot.controlHub);
-//        data.addHubData(robot.secondHub);
-
         double turn = deadZone(gamepad1.right_stick_x);
         double y = -deadZone(gamepad1.left_stick_y);
         double x = deadZone(gamepad1.left_stick_x);
         robot.driveTrain.spinDrive(x, y, turn);
+        whenPressedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(1), 2);
+        whenReleasedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(0), 3);
+        whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(-1), 4);
+        whenReleasedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(0), 5);
+        whenPressedDebounce(() -> gamepad2.x, () -> {
+            foundationGrabbed = !foundationGrabbed;
+            robot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, foundationGrabbed);
+        }, 6);
+        telemetry.addData("Drive", "x:%f, y:%f, turn:%f", x, y, turn);
+        robot.lift.liftMove(gamepad2.left_stick_y);
 
 //        if (robot.stoneManipulator.getState() == State.RESTING) {
 //            whenPressedDebounce(() -> gamepad2.dpad_up, () -> robot.lift.moveUp(), 0);
@@ -142,15 +146,14 @@ public class OfficialTeleop extends OpMode {
 //        robot.lift.updatePosition();
 //        robot.lift.updateRightMotor();
 
-//        if (robot.lift.getLevel() == 0 && robot.stoneManipulator.getState() == State.RESTING && !robot.stoneManipulator.isGrabbed()) {
-            whenPressedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(1), 2);
+//        if (robot.lift.getLevel() == 0 && robot.stoneManipulator.getState() == State.RESTING && !robot.stoneManipulator.isGrabbed())
 //        }
-        whenReleasedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(0), 3);
+
 
 //        if (robot.lift.getLevel() == 0 && robot.stoneManipulator.getState() == State.RESTING && !robot.stoneManipulator.isGrabbed()) {
-            whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(-1), 4);
+
 //        }
-        whenReleasedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(0), 5);
+
 
 //        if (robot.stoneManipulator.getState() == State.RESTING && robot.stoneManipulator.isGrabbed()) {
 //            whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setExtended(true), 3);
@@ -163,16 +166,14 @@ public class OfficialTeleop extends OpMode {
 //            whenPressedDebounce(() -> gamepad2.a, () -> robot.stoneManipulator.setGrabbed(!robot.stoneManipulator.isGrabbed()), 4);
 //        }
 
-        whenPressedDebounce(() -> gamepad2.x, () -> {
-            foundationGrabbed = !foundationGrabbed;
-            robot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, foundationGrabbed);
-        }, 6);
+
 
 //        robot.driveTrain.updateLocation();
 
-        telemetry.addData("Drive", "x:%f, y:%f, turn:%f", x, y, turn);
+
 //        telemetry.addData("Lift level", robot.lift.getLevel());
 //        telemetry.addData("Drive Base Location", robot.driveTrain.getLocation());
+        telemetry.update();
 
     }
 

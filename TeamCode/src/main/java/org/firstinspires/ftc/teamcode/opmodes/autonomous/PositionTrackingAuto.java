@@ -60,6 +60,8 @@ public class PositionTrackingAuto extends LinearOpMode {
         telemetry.update();
     }
 
+
+
     int numOfTicks = 4096;
     double pi = 3.14159265358979323;
     int wheelDiameter = 2;
@@ -80,14 +82,52 @@ public class PositionTrackingAuto extends LinearOpMode {
         double targetLeftPos = ticksMovement + currentLeftPos;
         double targetRightPos = ticksMovement + currentRightPos;
 
-        if (leftOdo.getCurrentPosition() != targetLeftPos && rightOdo.getCurrentPosition() != targetRightPos) {
-            left2.setPower(1);
-            right1.setPower(1);
+
+        //If x is less than 0;
+        if (x < 0 && y > 0){
+            if (leftOdo.getCurrentPosition() != targetLeftPos && rightOdo.getCurrentPosition() != targetRightPos) {
+                left2.setPower(1);
+                right1.setPower(1);
+            }
         }
+        else if (x < 0 && y < 0) {
+            if (leftOdo.getCurrentPosition() != targetLeftPos && rightOdo.getCurrentPosition() != targetRightPos) {
+                left1.setPower(-1);
+                right2.setPower(-1);
+            }
+        }
+
+        //If x is greater than 0
+
+        else if (x > 0 && y < 0){
+            if (leftOdo.getCurrentPosition() != targetLeftPos && rightOdo.getCurrentPosition() != targetRightPos) {
+                left2.setPower(-1);
+                right1.setPower(-1);
+            }
+        }
+
+        else if (x > 0 && y > 0){
+            if (leftOdo.getCurrentPosition() != targetLeftPos && rightOdo.getCurrentPosition() != targetRightPos) {
+                left2.setPower(1);
+                right1.setPower(1);
+            }
+        }
+
+        //Everything else;
+
         else {
             left2.setPower(0);
             right1.setPower(0);
         }
+
+//        if (leftOdo.getCurrentPosition() != targetLeftPos && rightOdo.getCurrentPosition() != targetRightPos) {
+//            left1.setPower(-1);
+//            right2.setPower(-1);
+//        }
+//        else {
+//            left2.setPower(0);
+//            right1.setPower(0);
+//        }
 
 
     }
