@@ -108,7 +108,7 @@ public class MecanumTeleop extends LinearOpMode {
 
             float vertical = -(gamepad1.left_stick_y);
             float horizontal = gamepad1.left_stick_x;
-            float pivot = gamepad1.right_stick_x;
+            float pivot = gamepad1.right_stick_x / 2;
 
             setRight1Power(-pivot + (vertical - horizontal));
             setRight2Power(-pivot + (vertical + horizontal));
@@ -138,12 +138,12 @@ public class MecanumTeleop extends LinearOpMode {
 
             if (!prevPos && gamepad2.x) {
                 if (!pos) {
-                    grabRight.setPosition(.753);
-                    grabLeft.setPosition(.159);
+                    grabRight.setPosition(0.61);
+                    grabLeft.setPosition(0.31);
                     pos = !pos;
                 } else {
-                    grabRight.setPosition(0.220);
-                    grabLeft.setPosition(0.665);
+                    grabRight.setPosition(0.076);
+                    grabLeft.setPosition(0.847);
                     pos = !pos;
                 }
                 prevPos = true;

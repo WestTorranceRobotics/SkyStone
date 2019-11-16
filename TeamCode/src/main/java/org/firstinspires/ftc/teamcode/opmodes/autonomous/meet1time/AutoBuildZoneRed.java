@@ -16,7 +16,7 @@ public class AutoBuildZoneRed extends TimedAuto {
         backupGyro1 = hardwareMap.get(BNO055IMU.class, "imu1");
         backupGyro1.initialize(new BNO055IMU.Parameters());
         waitForStart();
-        timeInches(0, -30);
+        timeInches(-10, -30);
         bot.foundationGrabber.setGrabbed(BOTH, true);
         sleep(2000);
         timeInches(0, 100);
