@@ -29,6 +29,7 @@
 
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -42,7 +43,7 @@ import org.westtorrancerobotics.lib.Angle;
 import org.westtorrancerobotics.lib.Location;
 
 @TeleOp(name="Two Drivers", group="none")
-//@Disabled
+@Disabled
 public class OfficialTeleop extends OpMode {
 
     private Robot robot;
