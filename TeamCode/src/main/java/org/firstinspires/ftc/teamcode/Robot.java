@@ -6,8 +6,6 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
 import org.firstinspires.ftc.teamcode.subsystems.*;
 
-import java.util.HashMap;
-
 public class Robot implements AutoCloseable {
 
     public final ElapsedTime runtime;

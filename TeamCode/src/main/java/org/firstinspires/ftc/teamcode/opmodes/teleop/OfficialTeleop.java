@@ -38,6 +38,8 @@ import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
 import org.firstinspires.ftc.teamcode.subsystems.StoneManipulator.State;
+import org.westtorrancerobotics.lib.Angle;
+import org.westtorrancerobotics.lib.Location;
 
 @TeleOp(name="Two Drivers", group="none")
 //@Disabled
@@ -85,12 +87,12 @@ public class OfficialTeleop extends OpMode {
     @Override
     public void init_loop() {
 
-//        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
-//        data.clear();
-//        data.addHubData(robot.controlHub);
-//        data.addHubData(robot.secondHub);
+        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
+        data.clear();
+        data.addHubData(robot.controlHub);
+        data.addHubData(robot.secondHub);
 
-//        robot.lift.idle();
+        robot.lift.idle();
 
         telemetry.addData("Status", "Idling Lift Motor...");
         telemetry.update();
@@ -103,16 +105,17 @@ public class OfficialTeleop extends OpMode {
     @Override
     public void start() {
 
-//        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
-//        data.clear();
-//        data.addHubData(robot.controlHub);
-//        data.addHubData(robot.secondHub);
+        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
+        data.clear();
+        data.addHubData(robot.controlHub);
+        data.addHubData(robot.secondHub);
 
         robot.runtime.reset();
 
-//        robot.lift.zero();
+        robot.driveTrain.setLocation(Location.ORIGIN);
 
-//        robot.driveTrain.setLocationZero();
+        robot.lift.zero();
+        robot.lift.setLevel(0);
 
         telemetry.addData("Status", "Lift Initialized.");
         telemetry.update();
@@ -127,6 +130,8 @@ public class OfficialTeleop extends OpMode {
         double turn = deadZone(gamepad1.right_stick_x);
         double y = -deadZone(gamepad1.left_stick_y);
         double x = deadZone(gamepad1.left_stick_x);
+        Angle dir = new Angle(x, y);
+        Angle rot = robot.driveTrain.getLocation().direction;
         robot.driveTrain.spinDrive(x, y, turn);
         whenPressedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(1), 2);
         whenReleasedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(0), 3);
@@ -144,7 +149,6 @@ public class OfficialTeleop extends OpMode {
 //            whenPressedDebounce(() -> gamepad2.dpad_down, () -> robot.lift.moveDown(), 1);
 //        }
 //        robot.lift.updatePosition();
-//        robot.lift.updateRightMotor();
 
 //        if (robot.lift.getLevel() == 0 && robot.stoneManipulator.getState() == State.RESTING && !robot.stoneManipulator.isGrabbed())
 //        }
@@ -166,15 +170,7 @@ public class OfficialTeleop extends OpMode {
 //            whenPressedDebounce(() -> gamepad2.a, () -> robot.stoneManipulator.setGrabbed(!robot.stoneManipulator.isGrabbed()), 4);
 //        }
 
-
-
-//        robot.driveTrain.updateLocation();
-
-
-//        telemetry.addData("Lift level", robot.lift.getLevel());
-//        telemetry.addData("Drive Base Location", robot.driveTrain.getLocation());
         telemetry.update();
-
     }
 
     /*

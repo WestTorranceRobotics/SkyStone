@@ -47,15 +47,9 @@ public class StoneManipulator {
         extenderReverseLimit = hardwareMap.get(TouchSensor.class, "extenderReverseLimit");
         rightIntake = hardwareMap.get(DcMotor.class, "intakeRight/odometerRightY");
         leftIntake = hardwareMap.get(DcMotor.class, "intakeLeft/odometerLeftY");
-        stoneGrabBig = hardwareMap.get(Servo.class, "nubGrabBig");
-        stoneGrabLittle = hardwareMap.get(Servo.class, "nubGrabLittle");
-       //outtakeRight = hardwareMap.get(CRServo.class, "outtakeRight");
-        //outtakeLeft = hardwareMap.get(CRServo.class, "outtakeLeft");
-        stoneGrabBig.scaleRange(FORWARD_GRABBER_UNCLASPED_POSITION,FORWARD_GRABBER_CLASPED_POSITION);
-        stoneGrabLittle.scaleRange(BACKWARD_GRABBER_CLASPED_POSITION,BACKWARD_GRABBER_UNCLASPED_POSITION);
-        stoneGrabBig.setPosition(0);
-        stoneGrabLittle.setPosition(0);
-        leftIntake.setDirection(DcMotor.Direction.REVERSE); }
+        leftIntake.setDirection(DcMotor.Direction.REVERSE);
+    }
+  
     /**
      * Sets the power of the intake
      *
@@ -104,6 +98,7 @@ public class StoneManipulator {
     } public boolean isGrabbed () {
         return (clasped);
     }
+
     public enum State {
         RESTING,
         EXTENDED,

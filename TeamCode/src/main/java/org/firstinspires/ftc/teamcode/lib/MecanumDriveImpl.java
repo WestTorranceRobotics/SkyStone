@@ -33,62 +33,7 @@ public class MecanumDriveImpl implements MecanumDrive {
     }
 
     @Override
-    public double getFrontLeftPower() {
-        return leftFront.getPower();
-    }
-
-    @Override
-    public double getBackLeftPower() {
-        return leftBack.getPower();
-    }
-
-    @Override
-    public double getFrontRightPower() {
-        return rightFront.getPower();
-    }
-
-    @Override
-    public double getBackRightPower() {
-        return rightBack.getPower();
-    }
-
-    @Override
-    public long getFrontLeftEncoder() {
-        return leftFront.getCurrentPosition();
-    }
-
-    @Override
-    public long getFrontRightEncoder() {
-        return rightFront.getCurrentPosition();
-    }
-
-    @Override
-    public long getBackLeftEncoder() {
-        return leftBack.getCurrentPosition();
-    }
-
-    @Override
-    public long getBackRightEncoder() {
-        return rightBack.getCurrentPosition();
-    }
-
-    @Override
-    public Angle getGyro() {
-        return gyro.getHeading();
-    }
-
-    @Override
     public double getWheelbaseWidth() {
         return 14.544475;
-    }
-
-    @Override
-    public double getWheelDiameter() {
-        return 4;
-    }
-
-    @Override
-    public double getEncoderTicksPerRevolution() {
-        return 560;
     }
 }

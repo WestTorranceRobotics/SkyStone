@@ -5,10 +5,9 @@ import com.qualcomm.hardware.rev.RevTouchSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
-import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
 public class Lift {
     private DcMotorEx leftMotor;
@@ -17,24 +16,26 @@ public class Lift {
     private final double MAX_NO_BLOCK_DIST_IN = 1;
     private boolean hadBlock;
     private RevTouchSensor bottomLimit;
+    private long encoderZero;
+    private long encoderTarget;
     private int level;
-    private final int LEVEL_HEIGHT = 300; // ticks per lift level
+    private final int LEVEL_HEIGHT = (int) (4 * TICKS_PER_INCH);
     private final int MAX_LEVEL = 4;
     //private ElapsedTime runtime = new ElapsedTime();
     //private double integral = 0;
     private double FEEDFORWARD = .33;
-  /*  private final double Kp = .2;
-    private final double Ki = 1;
-    private final double Kd = 1;
-    private final double LEVEL_0 = 0;
-    private final double LEVEL_1 = 125;
-    private final double LEVEL_2 = 275;
-    private final double LEVEL_3 = 450;
-    private final double LEVEL_4 = 690;*/
-    //private final double MAX_SPEED = 23.48;
-    //private final double Ktemp = MAX_SPEED;
-    //private double feed = 0;
 
+    private double P;
+    private double I;
+    private double D;
+    private double F;
+
+    private PidfController velocityControl;
+    private DoubleUnaryOperator velocityProfile;
+    private ElapsedTime velocityProfileTimer;
+    private double velocityProfileDuration;
+
+    private State state;
 
     private static Lift instance = null;
 
@@ -53,6 +54,8 @@ public class Lift {
         rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         leftMotor = hardwareMap.get(DcMotorEx.class, "liftLeft");
         leftMotor.setDirection(DcMotor.Direction.REVERSE);
+        leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         double aParam = 315;
         double bInvParam = 0.605;
@@ -68,48 +71,54 @@ public class Lift {
         bottomLimit = hardwareMap.get(RevTouchSensor.class, "liftLimitSwitch");
         level = 0;
 
-        hadBlock = false;
-        wasIdling = false;
-        wasStill = true;
-    }
+        velocityControl = new PidfController(() -> P, () -> I, () -> D, (pos) -> F);
+        double cpsMax = SPEED * TICKS_PER_INCH;
+        velocityControl.setOutputRange(-cpsMax, cpsMax);
+        velocityProfileTimer = new ElapsedTime();
 
-    private boolean wasIdling;
-    private boolean wasStill;
+        hadBlock = false;
 
     public void idle() {
         if (ButtonAndEncoderData.getLatest().isPressed(bottomLimit)) {
-            if (!wasIdling) {
-                leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-                leftMotor.setPower(0.1);
-                rightMotor.setPower(0.1);
+            if (state != State.IDLING) {
+                leftMotor.setPower(IDLE_POWER);
+                rightMotor.setPower(IDLE_POWER);
+                rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
                 leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-                wasIdling = true;
+                state = State.IDLING;
             }
         } else {
-            if (!wasStill) {
+            if (state != State.OFF) {
                 leftMotor.setPower(0);
                 rightMotor.setPower(0);
-                wasStill = true;
+                state = State.OFF;
             }
         }
     }
 
     public void zero() {
+        encoderZero = ButtonAndEncoderData.getLatest().getCurrentPosition(leftMotor);
         leftMotor.setPower(0);
         rightMotor.setPower(0);
-        leftMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        rightMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        state = State.OFF;
     }
 
     public void setLevel(int level) {
-        this.level = level;
         if (level > MAX_LEVEL) {
-            this.level = MAX_LEVEL;
+            level = MAX_LEVEL;
         }
         if (level < 0) {
-            this.level = 0;
+            level = 0;
         }
+        if (level == this.level) {
+            return;
+        }
+        this.level = level;
+        encoderTarget = level * LEVEL_HEIGHT + encoderZero;
+        makeVelocityFunction(encoderTarget);
+        state = State.MOVING;
     }
 
     public int getLevel() {
@@ -117,75 +126,47 @@ public class Lift {
     }
 
     public void moveUp() {
-        level++;
-        if (level > MAX_LEVEL) {
-            level = MAX_LEVEL;
-        }
+        setLevel(level + 1);
     }
 
     public void moveDown() {
-        level--;
-        if (level < 0) {
-            level = 0;
-        }
+        setLevel(level - 1);
     }
 
     public void updatePosition() {
-        if (level != 0) {
-            wasStill = false;
+        double output = Double.NaN;
+        if ((level == 0 && ButtonAndEncoderData.getLatest().isPressed(bottomLimit)) || velocityProfile == null) {
+            if (state == State.OFF) {
+                return;
+            }
+            if (ButtonAndEncoderData.getLatest().getCurrentVelocity(leftMotor)
+                    > (SAFE_TO_OFF_VELOCITY / TICKS_PER_INCH)) {
+                output = velocityControl.getOutput(
+                        ButtonAndEncoderData.getLatest().getCurrentVelocity(leftMotor),
+                        0
+                );
+            } else {
+                leftMotor.setPower(0);
+                rightMotor.setPower(0);
+                state = State.OFF;
+                return;
+            }
         }
-        wasIdling = false;
-        leftMotor.setTargetPosition(level * LEVEL_HEIGHT);
-    }
-
-    public void updateRightMotor() {
-        if (level != 0) {
-            rightMotor.setPower(Robot.getInstance().controlHub.getMotorVoltagePercent(leftMotor));
-            wasStill = false;
-        } else if (!wasStill) {
-            rightMotor.setPower(0);
-            wasStill = true;
+        if (Double.isNaN(output)) {
+            output = velocityControl.getOutput(
+                    ButtonAndEncoderData.getLatest().getCurrentVelocity(leftMotor),
+                    velocityProfile.applyAsDouble(velocityProfileTimer.seconds())
+            );
         }
+        state = profileFinished() ? State.IDLING : State.MOVING;
+        leftMotor.setPower(output);
+        rightMotor.setPower(output);
     }
 
     public boolean hasBlock() {
         return blockDetector.getDistance(DistanceUnit.INCH) < MAX_NO_BLOCK_DIST_IN;
 
     }
-/*
-    private double pidPos(double currentPos, double targetPos) {
-        //double error = targetPos - currentPos;
-        // if ((error < .1 && error != 0) || (error > .1 && error!= 0)) {error = 0;}
-        //double proportional = error * Kp;
-        //double targetVel = 1 * proportional;
-        return FEEDFORWARD;
-    }*/
-
-
-    //  /* private double pidVel(double initialTime, double targetVel) {
-    //    double currentVel = (leftMotor.getVelocity());
-    //   double error = targetVel - currentVel;
-    // if (targetVel == 0) {error =0;}
-    //if ((error < .1 && error != 0) || (error > .1 && error!= 0)) {error = 0;}
-    // double proportional = error * Kp;
-    //    integral += error * (runtime.time() - initialTime) ;
-    // integral = ( error == 0 ) ? 0 : integral;
-    // double derivative = 0;//error / (runtime.time() - initialTime);
-    //  double feedforward = FEEDFORWARD;
-    // return ((feedforward + proportional > 1) ? 1 : feedforward + proportional);*/
-    //   }
-
-   /* public void pidProcess(int level) {
-        //double initialTime = runtime.time();
-        //  double targetPosition = (level == 0) ? LEVEL_0 :(level == 1) ? LEVEL_1 : (level == 2) ? LEVEL_2 : (level == 3) ? LEVEL_3 : (level == 4) ? LEVEL_4 : 0 ;
-        //double currentPosition = leftMotor.getCurrentPosition();
-        // replace later with limit switch code when switch is ready for use
-        //if (currentPosition <15) {leftMotor.resetDeviceConfigurationForOpMode();}
-        //double targetVel = pidPos(currentPosition, targetPosition);
-        //double power = (pidPos (currentPosition, targetPosition));
-        leftMotor.setPower(FEEDFORWARD);
-        rightMotor.setPower(FEEDFORWARD);
-    }*/
 
     public void liftMove(double input) {
         if (input < -.2)  {
@@ -203,7 +184,4 @@ public class Lift {
             rightMotor.setPower(FEEDFORWARD);
         }
     }
-    }
-
-
-
+}

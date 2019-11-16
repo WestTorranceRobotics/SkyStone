@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -14,7 +15,8 @@ import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
 
 import java.util.Base64;
 
-@Autonomous(name="TEST", group="Linear Opmode")
+@Disabled
+@Autonomous(name = "Test", group = "none")
 public class Test extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();

@@ -77,12 +77,12 @@ public class DriveTrain {
         mecanumController.spinDrive(x, y, turn, MecanumDrive.TranslTurnMethod.EQUAL_SPEED_RATIOS);
     }
 
-    public void updateLocation() {
-        odometer.update();
+    public void spinDrive(Angle ang, double speed, double turn) {
+        mecanumController.spinDrive(ang, speed, turn, MecanumDrive.TranslTurnMethod.EQUAL_SPEED_RATIOS);
     }
 
-    public void setLocationZero() {
-        odometer.myLocation = new Location(0, 0, new Angle(0, 1));
+    public void updateLocation() {
+        odometer.update();
     }
 
     public void setLocation(Location l) {
@@ -118,48 +118,50 @@ public class DriveTrain {
         private Odometer() {}
 
         public void init(HardwareMap hardwareMap) {
-            myLocation = new Location(0, 0, new Angle(0, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING));
             leftY = new Wheel(new Location(-6.815,1.645,
-                    new Angle(180, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)),
+                    new Angle(0, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)),
                     hardwareMap.get(DcMotorEx.class, "intakeLeft/odometerLeftY"));
             rightY = new Wheel(new Location(6.815,1.645,
-                    new Angle(0, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)),
+                    new Angle(180, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)),
                     hardwareMap.get(DcMotorEx.class, "intakeRight/odometerRightY"));
             x = new Wheel(new Location(7.087,-1.980,
-                    new Angle(-90, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)),
+                    new Angle(90, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)),
                     hardwareMap.get(DcMotorEx.class, "liftRight/odometerX"));
         }
 
         public void update() {
-            if ((ButtonAndEncoderData.getLatest().getCurrentPosition(leftY.encoder) - leftY.lastEnc) ==
-                    (ButtonAndEncoderData.getLatest().getCurrentPosition(rightY.encoder) - rightY.lastEnc)) {
-                long dy = (ButtonAndEncoderData.getLatest().getCurrentPosition(leftY.encoder) - leftY.lastEnc);
-                long dx = (ButtonAndEncoderData.getLatest().getCurrentPosition(x.encoder) - x.lastEnc);
-                leftY.lastEnc += dy;
-                rightY.lastEnc += dy;
+            double dly = leftY.getMovedInches();
+            double dry = rightY.getMovedInches();
+            double dx = x.getMovedInches();
+            if (isZero(dly + dry)) {
+                leftY.lastEnc += dly;
+                rightY.lastEnc += dry;
                 x.lastEnc += dx;
-                myLocation.translate(dx * TICKS_TO_INCHES, dy * TICKS_TO_INCHES);
+                Angle theta = myLocation.direction;
+                double fieldDx = dx * theta.getX() - dly * theta.getY();
+                double fieldDy = dx * theta.getY() + dly * theta.getX();
+                myLocation.translate(fieldDx, fieldDy);
                 return;
             }
             double[] solved = solve(new double[][]{
                     {
                             Math.cos(leftY.fetchDirection()),
                             -Math.sin(leftY.fetchDirection()),
-                            -leftY.getMovedInches(),
+                            -dly,
                             Math.cos(leftY.fetchDirection()) * leftY.relativeLocation.x
                                     - Math.sin(leftY.fetchDirection()) * leftY.relativeLocation.y
                     },
                     {
                             Math.cos(rightY.fetchDirection()),
                             -Math.sin(rightY.fetchDirection()),
-                            -rightY.getMovedInches(),
+                            -dry,
                             Math.cos(rightY.fetchDirection()) * rightY.relativeLocation.x
                                     - Math.sin(rightY.fetchDirection()) * rightY.relativeLocation.y
                     },
                     {
                             Math.cos(x.fetchDirection()),
                             -Math.sin(x.fetchDirection()),
-                            -x.getMovedInches(),
+                            -dx,
                             Math.cos(x.fetchDirection()) * x.relativeLocation.x
                                     - Math.sin(x.fetchDirection()) * x.relativeLocation.y
                     },
@@ -168,18 +170,19 @@ public class DriveTrain {
             double rotCenterRelX = solved[0];
             double rotCenterRelY = solved[1];
             double rotRadCw = 1 / solved[2];
+            double convT = myLocation.direction.getValue(Angle.AngleUnit.RADIANS, Angle.AngleOrientation.UNIT_CIRCLE);
             myLocation.direction = new Angle(
-                    myLocation.direction.getValue(Angle.AngleUnit.RADIANS, Angle.AngleOrientation.COMPASS_HEADING) + rotRadCw,
+                    myLocation.direction.getValue(Angle.AngleUnit.RADIANS, Angle.AngleOrientation.COMPASS_HEADING) - rotRadCw,
                     Angle.AngleUnit.RADIANS,
                     Angle.AngleOrientation.COMPASS_HEADING
             );
-            double oldX = myLocation.x;
-            double oldY = myLocation.y;
-            double r = Math.hypot(rotCenterRelX, rotCenterRelY);
-            double hr = rotCenterRelX + oldX;
-            double kr = rotCenterRelY + oldY;
-            double theta = -rotRadCw + Math.atan2(-rotCenterRelY, -rotCenterRelX);
-            myLocation.setLocation(hr + r * Math.cos(theta), kr + r * Math.sin(theta));
+            double hw = myLocation.x;
+            double kw = myLocation.y;
+            double hr = hw + Math.sin(convT) * rotCenterRelX + Math.cos(convT) * rotCenterRelY;
+            double kr = kw - Math.cos(convT) * rotCenterRelX + Math.sin(convT) * rotCenterRelY;
+            double r = Math.hypot(hw-hr, kw-kr);
+            double theta = -rotRadCw + Math.atan2(kw-kr, hw-hr);
+            myLocation.setLocation(-hr - r * Math.cos(theta), -kr - r * Math.sin(theta));
         }
 
         private class Wheel {
@@ -248,7 +251,7 @@ public class DriveTrain {
         }
 
         private boolean isZero(double number) {
-            return Math.abs(number) < 1e-15;
+            return Math.abs(number) < 1e-9;
         }
 
         private void swapRows(double[][] matrix, int row1, int row2) {

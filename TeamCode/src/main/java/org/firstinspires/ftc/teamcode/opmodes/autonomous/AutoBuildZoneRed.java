@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
@@ -12,6 +13,7 @@ import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.L
 import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.RIGHT;
 import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.BOTH;
 
+@Disabled
 @Autonomous(name = "Red Build Zone", group = "none")
 public class AutoBuildZoneRed extends LinearOpMode {
         @Override
