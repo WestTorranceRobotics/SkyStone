@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.utility;
+package org.firstinspires.ftc.teamcode.opmodes.utility.calibration;
 
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -9,8 +9,6 @@ import java.util.Map;
 @TeleOp(name = "ServoTester", group = "none")
 public class ServoTester extends OpMode {
 
-    private Servo arm;
-    private String name;
     private Object[] servos;
     private int index;
     private int pressed;
@@ -33,8 +31,8 @@ public class ServoTester extends OpMode {
 
     @Override
     public void loop() {
-        arm = (Servo) ((Map.Entry) servos[index]).getValue();
-        name = (String) ((Map.Entry) servos[index]).getKey();
+        Servo arm = (Servo) ((Map.Entry) servos[index]).getValue();
+        String name = (String) ((Map.Entry) servos[index]).getKey();
         if (gamepad1.dpad_right && !gamepad1.dpad_left && positions[index] < 1.0) {
             positions[index] += 0.001;
         }

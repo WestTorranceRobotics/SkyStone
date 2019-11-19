@@ -73,8 +73,6 @@ public class MecanumTeleop extends LinearOpMode {
         outtakeLeft = hardwareMap.crservo.get("outtakeLeft");
         outtakeRight = hardwareMap.crservo.get("outtakeRight");
 
-
-
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
 
