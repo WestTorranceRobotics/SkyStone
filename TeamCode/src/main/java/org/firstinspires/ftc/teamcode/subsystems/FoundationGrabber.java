@@ -13,11 +13,10 @@ public class FoundationGrabber {
 
     private Servo leftHook;
     private RevTouchSensor leftBlock;
-    private RevColorSensorV3 leftEye;
+    public RevColorSensorV3 leftEye;
     private Servo rightHook;
     private RevTouchSensor rightBlock;
-    private RevColorSensorV3 rightEye;
-
+    public RevColorSensorV3 rightEye;
     private RevTouchSensor frontTouch;
     private RevTouchSensor sideTouch;
 
@@ -28,7 +27,7 @@ public class FoundationGrabber {
 
     private final double RED_TO_BLUE_THRESHOLD = 1.5;
     private final double GREEN_TO_BLUE_THRESHOLD = 2.25;
-    private final double MAX_STONE_VISIBLE_DISTANCE_IN = 5;
+    private final double MAX_STONE_VISIBLE_DISTANCE_IN = 4;
 
     private static FoundationGrabber instance = null;
 
@@ -42,15 +41,16 @@ public class FoundationGrabber {
         leftHook = hardwareMap.get(Servo.class, "foundationHookLeft");
         leftBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchLeft");
 
-        double aParam = 315;
-        double bInvParam = 0.605;
-        double cParam = 169.7;
+        double aParam = 519.837;
+        double bInvParam = 0.467;
+        double cParam = 175.572;
+        double dParam = -0.753;
         leftEye = new RevColorSensorV3(
                 hardwareMap.get(RevColorSensorV3.class, "ssColorLeft").getDeviceClient()
         ) {
             @Override
             protected double inFromOptical(int rawOptical) {
-                return Math.pow((rawOptical - cParam) / aParam, -bInvParam);
+                return Math.pow((rawOptical - cParam) / aParam, -bInvParam) + dParam;
             }
         };
 
@@ -63,7 +63,7 @@ public class FoundationGrabber {
         ) {
             @Override
             protected double inFromOptical(int rawOptical) {
-                return Math.pow((rawOptical - cParam) / aParam, -bInvParam);
+                return Math.pow((rawOptical - cParam) / aParam, -bInvParam) + dParam;
             }
         };
 
