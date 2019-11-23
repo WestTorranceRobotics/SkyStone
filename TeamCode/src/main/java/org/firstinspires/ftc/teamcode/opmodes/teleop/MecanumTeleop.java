@@ -128,7 +128,8 @@ public class MecanumTeleop extends LinearOpMode {
 
             if (gamepad2.dpad_right) {
                 outtakeSpeed = -.75;
-            } else if (gamepad2.dpad_left) { outtakeSpeed = .75;} else { outtakeSpeed = 0;}
+            }
+            else if (gamepad2.dpad_left) { outtakeSpeed = .75;} else { outtakeSpeed = 0;}
             intakeLeft.setPower(intakeSpeed);
             intakeRight.setPower(intakeSpeed);
             outtakeRight.setPower(outtakeSpeed);

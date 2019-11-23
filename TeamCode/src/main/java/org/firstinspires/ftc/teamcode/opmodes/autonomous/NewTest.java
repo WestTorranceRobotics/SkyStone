@@ -2,24 +2,24 @@ package org.firstinspires.ftc.teamcode.opmodes.autonomous;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
-import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
+import org.westtorrancerobotics.lib.MecanumController;
+import org.westtorrancerobotics.lib.MecanumDrive;
 
 @Autonomous(name="NewTest", group="Linear Opmode")
-@Disabled
 public class NewTest extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
-    FoundationGrabber grab;
-    Robot bot;
+    private Robot bot;
     // defining back right wheel
     private DcMotor left1;
     // defining back left wheel
@@ -28,6 +28,7 @@ public class NewTest extends LinearOpMode {
     private DcMotor right1;
     // defining back left wheel
     private DcMotor right2;
+    private RevColorSensorV3 leftEye;
     // color sensor
 
 
@@ -59,7 +60,9 @@ public class NewTest extends LinearOpMode {
 //    // only for the nub grabber right
 //    private Servo nubGrabLeft;
 //    // only for the nub grabber left
-
+    double aParam = 315;
+    double bInvParam = 0.605;
+    double cParam = 169.7;
 
     @Override
     public void runOpMode() {
@@ -68,13 +71,21 @@ public class NewTest extends LinearOpMode {
 
         bot = Robot.getInstance();
 
-        bot.init(hardwareMap);
+       bot.init(hardwareMap);
+
+        leftEye = new RevColorSensorV3(
+                hardwareMap.get(RevColorSensorV3.class, "ssColorLeft").getDeviceClient()
+        ) {
+            @Override
+            protected double inFromOptical(int rawOptical) {
+                return Math.pow((rawOptical - cParam) / aParam, -bInvParam);
+            }
+        };
 
         left1 = hardwareMap.dcMotor.get("leftFront");
         left2 = hardwareMap.dcMotor.get("leftBack");
         right1 = hardwareMap.dcMotor.get("rightFront");
         right2 = hardwareMap.dcMotor.get("rightBack");
-
 
         intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
         intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
@@ -85,7 +96,6 @@ public class NewTest extends LinearOpMode {
         liftLeft = hardwareMap.dcMotor.get("liftLeft");
         liftRight = hardwareMap.dcMotor.get("liftRight/odometerX");
 
-
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
 
@@ -95,35 +105,35 @@ public class NewTest extends LinearOpMode {
         left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         left2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
         intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        double leftSight = grab.getDistance(FoundationGrabber.Hook.LEFT);
-        double rightSight = grab.getDistance(FoundationGrabber.Hook.RIGHT);
-        telemetry.addData("Distance: Left ", leftSight);
-        telemetry.addData("Distance: Right", rightSight);
-
         waitForStart();
+
+
 
         runtime.reset();
         runtime.startTime();
 
-        while (runtime.seconds() !=3) {
-            left1.setPower(0.8);
-            left2.setPower(0.8);
-            right1.setPower(0.8);
-            right2.setPower(0.8);
-        }
+        driveDistance(30,Direction.FORWARD);
 
-        while(opModeIsActive()) {
-            telemetry.addData("RED", bot.driveTrain.lineSpotter.red());
-            telemetry.addData("BLUE", bot.driveTrain.lineSpotter.blue());
-            telemetry.addData("GREEN", bot.driveTrain.lineSpotter.green());
-            telemetry.update();
-        }
+//
+//        while(opModeIsActive()) {
+//
+//            runtime.reset();
+//
+//            if (runtime.seconds() == 5){
+//                telemetry.addData("hi", 1);
+//            }
+//
+//            driveDistance(30,Direction.BACKWARD);
+//
+//
+//        }
 
 
-        driveDistance(30,0,Direction.FORWARD);
+        //driveDistance(30,0,Direction.FORWARD);
 
 //        while (opModeIsActive()) {
 //            movement(30,0.8,0.8,0.8,0.8,5);
@@ -157,13 +167,23 @@ public class NewTest extends LinearOpMode {
     double PI = 3.14159265358979323;
     int WHEEL_DIAMETER = 2;
     double conversion = NUM_OF_TICKS / (WHEEL_DIAMETER * PI);
-    double TIME;
-    double DISTANCE;
-    double convert = TIME/DISTANCE;
+
+    double TIMEX = 1000;
+    double DISTANCEX = 36;
+
+    double TIMEY = 0;
+    double DISTANCEY = 0;
+
+    double convertX = TIMEX/DISTANCEX;
+    double convertY = TIMEY/DISTANCEY;
+
     double power = 0.8;
-    double DistanceX = 3;
+
+    double DistanceX = 36;
+
     double POWEROVERDISTANCEX = power/DistanceX; //FORWARD MOVEMENT
-    double DistanceY = 3;
+
+    double DistanceY = 25;
     double POWEROVERDISTANCEY = power/DistanceY; //SIDE TO SIDE MOVEMENT
 
 
@@ -225,138 +245,116 @@ public class NewTest extends LinearOpMode {
             right2.setPower(0);
         }
     }
-        boolean seeing (double left, double right) {
-            if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.RIGHT, right)) {
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
-                return true;
-            }
-            if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.LEFT, left)) {
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
-                return true;
-            } else {
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, false);
-                return false;
-            }
+//    boolean seeing (double left, double right) {
+//        if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.RIGHT, right)) {
+//            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+//            return true;
+//        }
+//        if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.LEFT, left)) {
+//            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
+//            return true;
+//        } else {
+//            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, false);
+//            return false;
+//        }
+//    }
+
+    public void driveDistance(double distance, Direction direction){
+
+        double distanceToPower;
+
+        runtime.reset();
+
+        if(direction == Direction.FORWARD){
+            distanceToPower = POWEROVERDISTANCEX * distance;
+
+
+            left1.setPower(distanceToPower);
+            left2.setPower(distanceToPower);
+            right1.setPower(distanceToPower);
+            right2.setPower(distanceToPower);
+            sleep(1000);
+
+            left1.setPower(0);
+            left2.setPower(0);
+            right1.setPower(0);
+            right2.setPower(0);
+
         }
+        if(direction == Direction.BACKWARD){
+            distanceToPower = POWEROVERDISTANCEX * distance;
 
-        public void driveDistance(double x, double y, Direction direction){
 
-            double distance = (long) Math.hypot(x, y);
+            left1.setPower(-distanceToPower);
+            left2.setPower(-distanceToPower);
+            right1.setPower(-distanceToPower);
+            right2.setPower(-distanceToPower);
+            sleep(1000);
 
-            double time = distance * convert;
+            left1.setPower(0);
+            left2.setPower(0);
+            right1.setPower(0);
+            right2.setPower(0);
 
-            double rate = distance/time;
-
-            double distanceToPower;
-
-            runtime.reset();
-            runtime.startTime();
-
-            if(direction == Direction.FORWARD){
-                distanceToPower = POWEROVERDISTANCEX * rate;
-
-                if (runtime.seconds() != time) {
-
-                    left1.setPower(distanceToPower);
-                    left2.setPower(distanceToPower);
-                    right1.setPower(distanceToPower);
-                    right2.setPower(distanceToPower);
-
-                }
-            }
-            if(direction == Direction.BACKWARD){
-
-                distanceToPower = POWEROVERDISTANCEX * rate;
-
-                if (runtime.seconds() != time) {
-
-                    left1.setPower(-distanceToPower);
-                    left2.setPower(-distanceToPower);
-                    right1.setPower(-distanceToPower);
-                    right2.setPower(-distanceToPower);
-                }
-            }
-
-            if(direction == Direction.LEFT){
-
-                distanceToPower = POWEROVERDISTANCEY * distance;
-
-                while (runtime.seconds() != time) {
-
-                    left1.setPower(-distanceToPower);
-                    left2.setPower(distanceToPower);
-                    right1.setPower(distanceToPower);
-                    right2.setPower(-distanceToPower);
-
-                }
-            }
-
-            if(direction == Direction.RIGHT){
-
-                distanceToPower = POWEROVERDISTANCEY * distance;
-
-                while (runtime.seconds() != time){
-                    left1.setPower(distanceToPower);
-                    left2.setPower(-distanceToPower);
-                    right1.setPower(-distanceToPower);
-                    right2.setPower(distanceToPower);
-                }
-
-            }
 
         }
 
-//        public void forwardMovement(double distance, boolean forward, double time) {
-//
-//        //Can be backwards too.
-//
-//        double position = 0;
-//        double power = 0.8;
-//        double DistanceX = 3;
-//        double convert = power/DistanceX; //Equation for power is (Power * Time)/ distance
-//
-//        //Long sleepTime = (long) Math.hypot(x, y)
-//
-//            //Test the power to time to distance.. I.e Test at a certain level of power, how far and long it takes to get a spot. Remember!!!! STILL NEED TO TEST!!!!
-//
-//        double rate = distance/time;
-//
-//        double distanceToPower = rate * convert;
-//
-//        if (distanceToPower > 1) {
-//            distanceToPower = 1;
-//            time = convert * distance;
-//        }
-//
-//        if (forward == false){
-//            distanceToPower *= -1;
-//        }
-//
-//        runtime.reset();
-//
-//        while (distance != position && runtime.seconds() <= time) {
-//
-//            left1.setPower(distanceToPower);
-//            left2.setPower(distanceToPower);
-//            right1.setPower(distanceToPower);
-//            right2.setPower(distanceToPower);
-//
-//            telemetry.addData("Time", time);
-//            telemetry.addData("Distance", distance);
-//
-//            telemetry.update();
-//            sleep(1000);
-//
-//            position += rate;
-//        }
-//
-//        }
+        if(direction == Direction.LEFT){
+            distanceToPower = POWEROVERDISTANCEY * distance;
 
-        enum Direction{
-            LEFT,
-            RIGHT,
-            FORWARD,
-            BACKWARD
+
+                left1.setPower(-distanceToPower);
+                left2.setPower(distanceToPower);
+                right1.setPower(distanceToPower);
+                right2.setPower(-distanceToPower);
+
+
         }
+
+        if(direction == Direction.RIGHT){
+
+            distanceToPower = POWEROVERDISTANCEY * distance;
+
+                left1.setPower(distanceToPower);
+                left2.setPower(-distanceToPower);
+                right1.setPower(-distanceToPower);
+                right2.setPower(distanceToPower);
+
+        }
+
+
+
     }
+
+
+     public void forwardMovement(double distance) {
+
+        //Can be backwards too.
+
+        int ticks = (int) distance * 4096;
+
+        left1.setTargetPosition(ticks);
+        left2.setTargetPosition(ticks);
+        right1.setTargetPosition(ticks);
+        right2.setTargetPosition(ticks);
+
+        left1.setPower(0.8);
+        left2.setPower(0.8);
+        right1.setPower(0.8);
+        right2.setPower(0.8);
+
+        left1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        left2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        right1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        right2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+     }
+
+    enum Direction{
+        LEFT,
+        RIGHT,
+        FORWARD,
+        BACKWARD
+    }
+}
 
