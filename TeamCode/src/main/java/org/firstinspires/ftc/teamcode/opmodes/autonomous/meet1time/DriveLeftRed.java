@@ -11,7 +11,6 @@ public class DriveLeftRed extends OpMode {
 
     Robot bot;
     RevColorSensorV3 color;
-
     boolean saw = false;
 
     @Override

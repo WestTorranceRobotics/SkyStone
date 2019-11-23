@@ -6,9 +6,6 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
-import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
 import org.firstinspires.ftc.teamcode.lib.FtcTestableGyroFactory;
 import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
@@ -67,7 +64,26 @@ public class DriveTrain {
         backupGyro1.initialize(params);
         params.calibrationDataFile = null;//gyro 2 config when made
         backupGyro2.initialize(params);
-        imus = FtcTestableGyroFactory
+
+        TestableGyro imu1 = FtcTestableGyroFactory.generate(backupGyro1);
+        TestableGyro imu2 = FtcTestableGyroFactory.generate(backupGyro2);
+        imu1.isWorking();
+        imu1.getHeading();
+        imu2.isWorking();
+        imu2.getHeading();
+        imus = new TestableGyro() {
+            @Override
+            public Angle getHeading() {
+                return imu1.isWorking() ? imu1.getHeading() : imu2.isWorking() ? imu2.getHeading() : imu1.getHeading();
+            }
+
+            @Override
+            public boolean isWorking() {
+                return imu1.isWorking() || imu2.isWorking();
+            }
+        };
+
+        gyro();
 
         MecanumDrive wheels = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack, null);
         mecanumController = new MecanumController(wheels);
@@ -118,8 +134,15 @@ public class DriveTrain {
         return lineSpotter.blue() > BLUE_THRESHOLD;
     }
 
-    public double gyro() {
-        return backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+    public Angle gyro() {
+        return imus.getHeading();
+    }
+
+    public void holdDirTranslate(double x, double y, Angle targetDir) {
+        double gyro = Angle.difference(targetDir, gyro(), Angle.AngleOrientation.COMPASS_HEADING)
+                .getValue(Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);
+        gyro = 0;
+        spinDrive(x, y, Math.sqrt(Math.abs(gyro)) / 9 * Math.signum(gyro));
     }
 
     private static class Odometer {

@@ -12,7 +12,7 @@ public class FtcTestableGyroFactory {
 
     private FtcTestableGyroFactory() {} // no constructor
 
-    static TestableGyro generate(BNO055IMU gyro) {
+    public static TestableGyro generate(BNO055IMU gyro) {
         return new TestableGyro() {
             @Override
             public Angle getHeading() {
@@ -28,7 +28,7 @@ public class FtcTestableGyroFactory {
         };
     }
 
-    static TestableGyro generate(ModernRoboticsI2cGyro gyro) {
+    public static TestableGyro generate(ModernRoboticsI2cGyro gyro) {
         return new TestableGyro() {
             @Override
             public Angle getHeading() {

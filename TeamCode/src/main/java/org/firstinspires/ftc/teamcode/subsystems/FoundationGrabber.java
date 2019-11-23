@@ -9,14 +9,17 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoublePredicate;
+
 public class FoundationGrabber {
 
     private Servo leftHook;
     private RevTouchSensor leftBlock;
-    public RevColorSensorV3 leftEye;
+    private RevColorSensorV3 leftEye;
     private Servo rightHook;
     private RevTouchSensor rightBlock;
-    public RevColorSensorV3 rightEye;
+    private RevColorSensorV3 rightEye;
     private RevTouchSensor frontTouch;
     private RevTouchSensor sideTouch;
 
@@ -25,8 +28,8 @@ public class FoundationGrabber {
     private final double RIGHT_GRABBED_POSITION = 0.61;
     private final double RIGHT_UNGRABBED_POSITION = 0.076;
 
-    private final double RED_TO_BLUE_THRESHOLD = 1.5;
-    private final double GREEN_TO_BLUE_THRESHOLD = 2.25;
+    private final double RED_TO_BLUE_THRESHOLD = 1.6;
+    private final double GREEN_TO_BLUE_THRESHOLD = 2.5;
     private final double MAX_STONE_VISIBLE_DISTANCE_IN = 4;
 
     private static FoundationGrabber instance = null;
@@ -50,6 +53,9 @@ public class FoundationGrabber {
         ) {
             @Override
             protected double inFromOptical(int rawOptical) {
+                if (rawOptical <= cParam) {
+                    return Double.POSITIVE_INFINITY;
+                }
                 return Math.pow((rawOptical - cParam) / aParam, -bInvParam) + dParam;
             }
         };
@@ -57,12 +63,14 @@ public class FoundationGrabber {
         rightHook = hardwareMap.get(Servo.class, "foundationHookRight");
         rightBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchRight");
 
-
         rightEye = new RevColorSensorV3(
                 hardwareMap.get(RevColorSensorV3.class, "ssColorRight").getDeviceClient()
         ) {
             @Override
             protected double inFromOptical(int rawOptical) {
+                if (rawOptical <= cParam) {
+                    return Double.POSITIVE_INFINITY;
+                }
                 return Math.pow((rawOptical - cParam) / aParam, -bInvParam) + dParam;
             }
         };
@@ -129,6 +137,21 @@ public class FoundationGrabber {
                 return leftEye.getDistance(DistanceUnit.INCH);
             case RIGHT:
                 return rightEye.getDistance(DistanceUnit.INCH);
+            default:
+                throw new IllegalArgumentException("Unknown or invalid hook " + hook + " provided.");
+        }
+    }
+
+    public boolean getDistancePredicated(Hook hook, DoublePredicate predicate) {
+        switch (hook) {
+            case LEFT:
+                return predicate.test(getDistance(Hook.LEFT));
+            case RIGHT:
+                return predicate.test(getDistance(Hook.RIGHT));
+            case EITHER:
+                return predicate.test(getDistance(Hook.LEFT)) || predicate.test(getDistance(Hook.RIGHT));
+            case BOTH:
+                return predicate.test(getDistance(Hook.LEFT)) && predicate.test(getDistance(Hook.RIGHT));
             default:
                 throw new IllegalArgumentException("Unknown or invalid hook " + hook + " provided.");
         }
