@@ -8,8 +8,6 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-//import com.qualcomm.robotcore.hardware.ColorSensor;
-
 @TeleOp(name="Mecanum Teleop", group="Linear Opmode")
 //@Disabled
 public class MecanumTeleop extends LinearOpMode {
@@ -22,22 +20,17 @@ public class MecanumTeleop extends LinearOpMode {
     private DcMotor right1;
     private DcMotor right2;
 
-    private ColorSensor color;
-
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
-    private Servo outtakeLeft;
-    private Servo outtakeRight;
 
     private DcMotor liftRight;
     private DcMotor liftLeft;
 
+    private Servo foundationHookRight;
+    private Servo foundationHookLeft;
+
     private Servo grabRight;
     private Servo grabLeft;
-
-    private Servo nubGrabRight;
-
-    private Servo nubGrabLeft;
 
     @Override
     public void runOpMode() {
@@ -49,14 +42,23 @@ public class MecanumTeleop extends LinearOpMode {
         right1 = hardwareMap.dcMotor.get("rightFront");
         right2 = hardwareMap.dcMotor.get("rightBack");
 
+        liftRight = hardwareMap.get(DcMotor.class, "liftRight/odometerX");
+        liftRight.setDirection(DcMotor.Direction.FORWARD);
+        liftRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        liftLeft = hardwareMap.get(DcMotor.class, "liftLeft");
+        liftLeft.setDirection(DcMotor.Direction.REVERSE);
+        liftLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        liftLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
         intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
 
         liftRight = hardwareMap.dcMotor.get("liftRight/odometerX");
         liftLeft = hardwareMap.dcMotor.get("liftLeft");
 
-        grabLeft = hardwareMap.servo.get("grabLeft");
-        grabRight = hardwareMap.servo.get("grabRight");
+        grabLeft = hardwareMap.servo.get("nubGrabLittle");
+        grabRight = hardwareMap.servo.get("nubGrabBig");
 
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -99,7 +101,7 @@ public class MecanumTeleop extends LinearOpMode {
 
             float vertical = -(gamepad1.left_stick_y);
             float horizontal = gamepad1.left_stick_x;
-            float pivot = gamepad1.right_stick_x;
+            float pivot = gamepad1.right_stick_x / 2;
 
             setRight1Power(-pivot + (vertical - horizontal));
             setRight2Power(-pivot + (vertical + horizontal));
@@ -111,30 +113,30 @@ public class MecanumTeleop extends LinearOpMode {
             right1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             right2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            // TODO fix the intake speeds (problem is here) for meet 1
+            int intakeSpeed = 0;
+
             if (gamepad2.right_bumper) {
-                intakeLeft.setPower(1);
-                intakeRight.setPower(1);
-                telemetry.addData("intakeLeft", intakeLeft);
-                telemetry.addData("intakeRight", intakeRight);
-            } else {
-                intakeRight.setPower(0);
-                intakeLeft.setPower(0);
+                intakeSpeed = 1;
             }
 
             if (gamepad2.left_bumper) {
-                intakeLeft.setPower(-1);
-                intakeRight.setPower(-1);
-                telemetry.addData("intakeLeft", intakeLeft);
-                telemetry.addData("intakeRight", intakeRight);
-            } else {
-                intakeRight.setPower(0);
-                intakeLeft.setPower(0);
+                intakeSpeed = -1;
             }
+            intakeLeft.setPower(intakeSpeed);
+            intakeRight.setPower(intakeSpeed);
 
-            telemetry.addData("right", grabRight.getPosition());
-            telemetry.addData("left", grabRight.getPosition());
-            telemetry.update();
+            if (gamepad2.dpad_up) {
+                liftLeft.setPower(.75);
+                liftRight.setPower(.75);
+            }
+            else if (gamepad2.dpad_down) {
+                liftRight.setPower(-.25);
+                liftLeft.setPower(-.25);
+            }
+            else {
+               liftRight.setPower(.33);
+               liftLeft.setPower(.33);
+            }
 
             if (!prevPos && gamepad2.x) {
                 if (!pos) {

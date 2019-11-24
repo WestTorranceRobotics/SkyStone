@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.lib;
+package org.westtorrancerobotics.lib.ftc;
 
 import android.util.SparseArray;
 
@@ -16,7 +16,7 @@ import java.lang.reflect.Field;
 
 public class ButtonAndEncoderData {
 
-    private SparseArray<LynxGetBulkInputDataResponse> responses;
+    private volatile SparseArray<LynxGetBulkInputDataResponse> responses;
 
     private ButtonAndEncoderData() {
         responses = new SparseArray<>();
@@ -46,18 +46,31 @@ public class ButtonAndEncoderData {
             Field moduleField = LynxController.class.getDeclaredField("module");
             moduleField.setAccessible(true);
             int port = (int) portField.get(touchSensor);
-            return responses.get(((LynxModule) moduleField.get(controller)).getModuleAddress()).getDigitalInput(port);
+            return !responses.get(((LynxModule) moduleField.get(controller)).getModuleAddress()).getDigitalInput(port);
         } catch (ReflectiveOperationException | ClassCastException ex) {
             throw new IllegalArgumentException();
         }
     }
 
     public long getCurrentPosition(DcMotorEx motor) {
+        return motor.getCurrentPosition();
+//         TODO fix to actually work right
+//        try {
+//            Field moduleField = LynxController.class.getDeclaredField("module");
+//            moduleField.setAccessible(true);
+//            return responses.get(((LynxModule) moduleField.get(motor.getController())).getModuleAddress())
+//                    .getEncoder(motor.getPortNumber());
+//        } catch (ReflectiveOperationException | ClassCastException ex) {
+//            throw new IllegalArgumentException();
+//        }
+    }
+
+    public long getCurrentVelocity(DcMotorEx motor) {
         try {
             Field moduleField = LynxController.class.getDeclaredField("module");
             moduleField.setAccessible(true);
             return responses.get(((LynxModule) moduleField.get(motor.getController())).getModuleAddress())
-                    .getEncoder(motor.getPortNumber());
+                    .getVelocity(motor.getPortNumber());
         } catch (ReflectiveOperationException | ClassCastException ex) {
             throw new IllegalArgumentException();
         }
@@ -65,7 +78,7 @@ public class ButtonAndEncoderData {
 
     private static ButtonAndEncoderData latest;
 
-    public static ButtonAndEncoderData getLatest() {
+    public static synchronized ButtonAndEncoderData getLatest() {
         return latest == null ? (latest = new ButtonAndEncoderData()) : latest;
     }
 

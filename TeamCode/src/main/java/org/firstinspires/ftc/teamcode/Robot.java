@@ -3,10 +3,8 @@ package org.firstinspires.ftc.teamcode;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
+import org.westtorrancerobotics.lib.ftc.ButtonAndEncoderData;
 import org.firstinspires.ftc.teamcode.subsystems.*;
-
-import java.util.HashMap;
 
 public class Robot implements AutoCloseable {
 

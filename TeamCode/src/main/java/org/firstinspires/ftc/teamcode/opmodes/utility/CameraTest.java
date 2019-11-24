@@ -5,7 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.Servo;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.westtorrancerobotics.lib.Location;
+import org.westtorrancerobotics.lib.spline.geom.Location;
 
 import java.util.Map;
 
@@ -14,9 +14,6 @@ public class CameraTest extends OpMode {
     private Robot cambot;
     private Location position;
     private Location skyposition;
-
-
-
 
     @Override
     public void init() {

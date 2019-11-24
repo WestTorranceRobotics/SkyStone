@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.opmodes.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -10,46 +11,32 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import java.util.Base64;
 
+@Disabled
 @Autonomous(name="Odometry Auto", group="Linear Opmode")
 public class OdometryAuto extends LinearOpMode {
     private ElapsedTime runtime = new ElapsedTime();
-    // defining back right wheel
+  
     private DcMotor left1;
-    // defining back left wheel
     private DcMotor left2;
-    // defining front right wheel
     private DcMotor right1;
-    // defining back left wheel
     private DcMotor right2;
-    // color sensor
 
-//    private ColorSensor color;
-//    // only for encoder use
+    private ColorSensor color;
 
     private DcMotor intakeLeft;
-    // only for motor intake left motor
     private DcMotor intakeRight;
+    private Servo outtakeLeft;
+    private Servo outtakeRight;
 
-//    // only for motor outtake right motor
-//    private Servo outtakeLeft;
-//    // only for motor outtake left
-//    private Servo outtakeRight;
-//    // only for motor outtake right
-//
     private DcMotor liftRight;
-    // only for elevator right motor
     private DcMotor liftLeft;
-    // only for elevator left motor
-//
-//    private Servo grabRight;
-//    // only for grabber right
-//    private Servo grabLeft;
-//    // only for grabber left
-//
-//    private Servo nubGrabRight;
-//    // only for the nub grabber right
-//    private Servo nubGrabLeft;
-//    // only for the nub grabber left
+
+    private Servo grabRight;
+    private Servo grabLeft;
+
+    private Servo nubGrabRight;
+
+    private Servo nubGrabLeft;
 
 
     @Override
@@ -62,30 +49,42 @@ public class OdometryAuto extends LinearOpMode {
         right1 = hardwareMap.dcMotor.get("rightFront");
         right2 = hardwareMap.dcMotor.get("rightBack");
 
+
+
         intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
         intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
 
-//        outtakeLeft = hardwareMap.servo.get("outtakeLeft");
-//        outtakeRight = hardwareMap.servo.get("outtakeRight");
-//
-        liftLeft = hardwareMap.dcMotor.get("liftLeft");
         liftRight = hardwareMap.dcMotor.get("liftRight/odometerX");
-//
-//        grabRight = hardwareMap.servo.get("grabRight");
-//        grabLeft = hardwareMap.servo.get("grabLeft");
-//
-//        nubGrabLeft = hardwareMap.servo.get("nubGrabLeft");
-//        nubGrabRight = hardwareMap.servo.get("nubGrabright");
+        liftLeft = hardwareMap.dcMotor.get("liftLeft");
 
+        grabLeft = hardwareMap.servo.get("grabLeft");
+        grabRight = hardwareMap.servo.get("grabRight");
+
+        int leftOdo = intakeLeft.getCurrentPosition();
+        int rightOdo = intakeRight.getCurrentPosition();
+        int alignOdo = liftRight.getCurrentPosition();
 
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
 
-        left1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeLeft.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        right1.setDirection(DcMotorSimple.Direction.REVERSE);
-        right2.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        intakeRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        liftRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        liftRight.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        intakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+        intakeRight.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeRight.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        intakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
+        intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         waitForStart();
 
@@ -93,7 +92,12 @@ public class OdometryAuto extends LinearOpMode {
         telemetry.update();
 
 
+
+
         straightMovement(15, 1, 1, 1, 1);
+        sideToSide(5,1,-1,-1,1);
+
+
         //sideToSide(6, 1, -1, -1, 1);
     }
 
@@ -151,6 +155,5 @@ public class OdometryAuto extends LinearOpMode {
             right1.setPower(0);
             right2.setPower(0);
         }
-
     }
 }

@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.lib;
+package org.westtorrancerobotics.lib.ftc;
 
 import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
@@ -6,12 +6,11 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
-import org.westtorrancerobotics.lib.Angle;
+import org.westtorrancerobotics.lib.spline.geom.Angle;
 
-public interface TestableGyro {
+public class FtcTestableGyroFactory {
 
-    Angle getHeading();
-    boolean isWorking();
+    private FtcTestableGyroFactory() {} // no constructor
 
     static TestableGyro generate(BNO055IMU gyro) {
         return new TestableGyro() {
@@ -42,41 +41,5 @@ public interface TestableGyro {
             }
         };
     }
-
-    static TestableGyro generate(TestableGyro... gyros) {
-        return new TestableGyro() {
-            @Override
-            public Angle getHeading() {
-                for (TestableGyro gyro : gyros) {
-                    if (gyro.isWorking()) {
-                        return gyro.getHeading();
-                    }
-                }
-                return new Angle(0, 1);
-            }
-
-            @Override
-            public boolean isWorking() {
-                for (TestableGyro gyro : gyros) {
-                    if (gyro.isWorking()) {
-                        return true;
-                    }
-                }
-                return false;
-            }
-        };
-    }
-
-    TestableGyro NULL = new TestableGyro() {
-        @Override
-        public Angle getHeading() {
-            return new Angle(0, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);
-        }
-
-        @Override
-        public boolean isWorking() {
-            return false;
-        }
-    };
 
 }

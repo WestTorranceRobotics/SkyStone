@@ -1,22 +1,27 @@
 package org.firstinspires.ftc.teamcode.opmodes.autonomous;
 
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.teamcode.Robot;
-import org.westtorrancerobotics.lib.Angle;
-import org.westtorrancerobotics.lib.Location;
+import org.westtorrancerobotics.lib.spline.geom.Angle;
+import org.westtorrancerobotics.lib.spline.geom.Location;
 
 import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.LEFT;
 import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.RIGHT;
 import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.BOTH;
 
-@Autonomous(name = "Red Build Zone", group = "none")
+@Disabled
+//@Autonomous(name = "Red Build Zone", group = "none")
 public class AutoBuildZoneRed extends LinearOpMode {
-        @Override
+
+    Robot bot = Robot.getInstance();
+
+    @Override
     public void runOpMode() throws InterruptedException {
-        Robot bot = Robot.getInstance();
+
         bot.init(hardwareMap);
         bot.foundationGrabber.setGrabbed(LEFT,false);
         bot.foundationGrabber.setGrabbed(RIGHT,false);
@@ -59,5 +64,32 @@ public class AutoBuildZoneRed extends LinearOpMode {
         bot.driveTrain.spinDrive(0, 0, 0);
         bot.close();
     }
+
+    private final int numOfTicks = 4096;
+    private final double pi = 3.14159265358979323;
+    private final int wheelDiameter = 2;
+    private final double conversion = numOfTicks / (wheelDiameter * pi);
+
+    public void moveInches(double x, double y) {
+        int TimeToDistance = 0; //ratio so that multiplying this by power and time will get you distance
+        double absDistance = Math.hypot(Math.abs(x), Math.abs(y));
+        long sleepTime = Double.valueOf(absDistance * TimeToDistance).longValue();
+
+        int newX = 0;
+        int newY = 0;
+
+        if (x < 0) {newX = -1;}
+        else if (x > 0) {newX = 1;}
+
+        if (y < 0) {newY = -1;}
+        else if (y > 0) {newY = 1;}
+
+        bot.driveTrain.spinDrive(newX, newY, 0);
+        sleep(sleepTime);
+        bot.driveTrain.spinDrive(0, 0, 0);
+
+
+    }
+
 }
 

@@ -18,8 +18,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackableDefau
 import org.firstinspires.ftc.robotcore.external.navigation.VuforiaTrackables;
 import org.firstinspires.ftc.robotcore.external.tfod.Recognition;
 import org.firstinspires.ftc.robotcore.external.tfod.TFObjectDetector;
-import org.westtorrancerobotics.lib.Angle;
-import org.westtorrancerobotics.lib.Location;
+import org.westtorrancerobotics.lib.spline.geom.Angle;
+import org.westtorrancerobotics.lib.spline.geom.Location;
 
 import java.util.ArrayList;
 import java.util.List;

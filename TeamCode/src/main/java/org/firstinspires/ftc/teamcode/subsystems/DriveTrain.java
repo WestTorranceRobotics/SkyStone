@@ -1,16 +1,18 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
-import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
-import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
-import org.westtorrancerobotics.lib.Angle;
-import org.westtorrancerobotics.lib.Location;
-import org.westtorrancerobotics.lib.MecanumController;
-import org.westtorrancerobotics.lib.MecanumDrive;
+import org.westtorrancerobotics.lib.ftc.ButtonAndEncoderData;
+import org.westtorrancerobotics.lib.ftc.MecanumDriveImpl;
+import org.westtorrancerobotics.lib.ftc.TestableGyro;
+import org.westtorrancerobotics.lib.spline.geom.Angle;
+import org.westtorrancerobotics.lib.spline.geom.Location;
+import org.westtorrancerobotics.lib.hardware.drive.MecanumController;
+import org.westtorrancerobotics.lib.hardware.drive.MecanumDrive;
 
 public class DriveTrain {
 
@@ -20,9 +22,11 @@ public class DriveTrain {
     private DcMotorEx rightBack;
     private MecanumController mecanumController;
 
+    private TestableGyro imus;
+
     private ColorSensor lineSpotter;
-    private static final int RED_THRESHOLD  = 5;
-    private static final int BLUE_THRESHOLD = 5;
+    private static final int RED_THRESHOLD  = 1800;
+    private static final int BLUE_THRESHOLD = 2000;
 
     private Odometer odometer;
 
@@ -45,14 +49,20 @@ public class DriveTrain {
         rightFront.setDirection(DcMotor.Direction.FORWARD);
         rightBack.setDirection(DcMotor.Direction.FORWARD);
 
-        leftFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        leftBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightFront.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         lineSpotter = hardwareMap.get(ColorSensor.class, "lineColor");
 
-        MecanumDrive wheels = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack, null);
+        BNO055IMU backupGyro1 = hardwareMap.get(BNO055IMU.class, "imu1");
+        BNO055IMU backupGyro2 = hardwareMap.get(BNO055IMU.class, "imu2");
+        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
+        params.calibrationDataFile = null;//gyro 1 config when made
+        backupGyro1.initialize(params);
+        params.calibrationDataFile = null;//gyro 2 config when made
+        backupGyro2.initialize(params);
+
+        MecanumDrive wheels = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack);
         mecanumController = new MecanumController(wheels);
 
         odometer = Odometer.getInstance();
@@ -77,12 +87,12 @@ public class DriveTrain {
         mecanumController.spinDrive(x, y, turn, MecanumDrive.TranslTurnMethod.EQUAL_SPEED_RATIOS);
     }
 
-    public void updateLocation() {
-        odometer.update();
+    public void spinDrive(Angle ang, double speed, double turn) {
+        mecanumController.spinDrive(ang, speed, turn, MecanumDrive.TranslTurnMethod.EQUAL_SPEED_RATIOS);
     }
 
-    public void setLocationZero() {
-        odometer.myLocation = new Location(0, 0, new Angle(0, 1));
+    public void updateLocation() {
+        odometer.update();
     }
 
     public void setLocation(Location l) {
@@ -99,6 +109,10 @@ public class DriveTrain {
 
     public boolean onBlueLine() {
         return lineSpotter.blue() > BLUE_THRESHOLD;
+    }
+
+    public double gyro() {
+        return imus.getHeading().getValue(Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);
     }
 
     private static class Odometer {
@@ -118,7 +132,6 @@ public class DriveTrain {
         private Odometer() {}
 
         public void init(HardwareMap hardwareMap) {
-            myLocation = new Location(0, 0, new Angle(0, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING));
             leftY = new Wheel(new Location(-6.815,1.645,
                     new Angle(180, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)),
                     hardwareMap.get(DcMotorEx.class, "intakeLeft/odometerLeftY"));
@@ -131,54 +144,58 @@ public class DriveTrain {
         }
 
         public void update() {
-            if ((ButtonAndEncoderData.getLatest().getCurrentPosition(leftY.encoder) - leftY.lastEnc) ==
-                    (ButtonAndEncoderData.getLatest().getCurrentPosition(rightY.encoder) - rightY.lastEnc)) {
-                long dy = (ButtonAndEncoderData.getLatest().getCurrentPosition(leftY.encoder) - leftY.lastEnc);
-                long dx = (ButtonAndEncoderData.getLatest().getCurrentPosition(x.encoder) - x.lastEnc);
-                leftY.lastEnc += dy;
-                rightY.lastEnc += dy;
+            double dly = leftY.getMovedInches();
+            double dry = rightY.getMovedInches();
+            double dx = x.getMovedInches();
+            if (isZero(dly + dry)) {
+                leftY.lastEnc += dly;
+                rightY.lastEnc += dry;
                 x.lastEnc += dx;
-                myLocation.translate(dx * TICKS_TO_INCHES, dy * TICKS_TO_INCHES);
+                Angle thetaY = myLocation.direction;
+                Angle thetaX = Angle.add(thetaY, Angle.EAST, Angle.AngleOrientation.COMPASS_HEADING);
+                double fieldDx = dx * thetaX.getX() + dry * thetaY.getX();
+                double fieldDy = dx * thetaX.getY() + dry * thetaY.getY();
+                myLocation.translate(fieldDx, fieldDy);
                 return;
             }
             double[] solved = solve(new double[][]{
                     {
                             Math.cos(leftY.fetchDirection()),
                             -Math.sin(leftY.fetchDirection()),
-                            -leftY.getMovedInches(),
+                            -dly,
                             Math.cos(leftY.fetchDirection()) * leftY.relativeLocation.x
                                     - Math.sin(leftY.fetchDirection()) * leftY.relativeLocation.y
                     },
                     {
                             Math.cos(rightY.fetchDirection()),
                             -Math.sin(rightY.fetchDirection()),
-                            -rightY.getMovedInches(),
+                            -dry,
                             Math.cos(rightY.fetchDirection()) * rightY.relativeLocation.x
                                     - Math.sin(rightY.fetchDirection()) * rightY.relativeLocation.y
                     },
                     {
                             Math.cos(x.fetchDirection()),
                             -Math.sin(x.fetchDirection()),
-                            -x.getMovedInches(),
+                            -dx,
                             Math.cos(x.fetchDirection()) * x.relativeLocation.x
                                     - Math.sin(x.fetchDirection()) * x.relativeLocation.y
-                    },
-                }
-            );
+                    }
+            });
             double rotCenterRelX = solved[0];
             double rotCenterRelY = solved[1];
             double rotRadCw = 1 / solved[2];
+            double convT = myLocation.direction.getValue(Angle.AngleUnit.RADIANS, Angle.AngleOrientation.UNIT_CIRCLE);
             myLocation.direction = new Angle(
                     myLocation.direction.getValue(Angle.AngleUnit.RADIANS, Angle.AngleOrientation.COMPASS_HEADING) + rotRadCw,
                     Angle.AngleUnit.RADIANS,
                     Angle.AngleOrientation.COMPASS_HEADING
             );
-            double oldX = myLocation.x;
-            double oldY = myLocation.y;
-            double r = Math.hypot(rotCenterRelX, rotCenterRelY);
-            double hr = rotCenterRelX + oldX;
-            double kr = rotCenterRelY + oldY;
-            double theta = -rotRadCw + Math.atan2(-rotCenterRelY, -rotCenterRelX);
+            double hw = myLocation.x;
+            double kw = myLocation.y;
+            double hr = hw + Math.sin(convT) * rotCenterRelX + Math.cos(convT) * rotCenterRelY;
+            double kr = kw - Math.cos(convT) * rotCenterRelX + Math.sin(convT) * rotCenterRelY;
+            double r = Math.hypot(hw-hr, kw-kr);
+            double theta = -rotRadCw + Math.atan2(kw-kr, hw-hr);
             myLocation.setLocation(hr + r * Math.cos(theta), kr + r * Math.sin(theta));
         }
 
@@ -248,7 +265,7 @@ public class DriveTrain {
         }
 
         private boolean isZero(double number) {
-            return Math.abs(number) < 1e-15;
+            return Math.abs(number) < 1e-9;
         }
 
         private void swapRows(double[][] matrix, int row1, int row2) {

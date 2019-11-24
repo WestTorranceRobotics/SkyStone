@@ -29,21 +29,21 @@
 
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 
 import org.firstinspires.ftc.robotcore.external.Supplier;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
-import org.firstinspires.ftc.teamcode.subsystems.StoneManipulator.State;
 
 @TeleOp(name="Two Drivers", group="none")
-//@Disabled
+@Disabled
 public class OfficialTeleop extends OpMode {
 
     private Robot robot;
+    private boolean blockGrabbed = false;
 
     private boolean foundationGrabbed;
 
@@ -85,13 +85,6 @@ public class OfficialTeleop extends OpMode {
     @Override
     public void init_loop() {
 
-//        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
-//        data.clear();
-//        data.addHubData(robot.controlHub);
-//        data.addHubData(robot.secondHub);
-
-//        robot.lift.idle();
-
         telemetry.addData("Status", "Idling Lift Motor...");
         telemetry.update();
 
@@ -103,16 +96,7 @@ public class OfficialTeleop extends OpMode {
     @Override
     public void start() {
 
-//        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
-//        data.clear();
-//        data.addHubData(robot.controlHub);
-//        data.addHubData(robot.secondHub);
-
         robot.runtime.reset();
-
-//        robot.lift.zero();
-
-//        robot.driveTrain.setLocationZero();
 
         telemetry.addData("Status", "Lift Initialized.");
         telemetry.update();
@@ -125,55 +109,23 @@ public class OfficialTeleop extends OpMode {
     @Override
     public void loop() {
 
-//        ButtonAndEncoderData data = ButtonAndEncoderData.getLatest();
-//        data.clear();
-//        data.addHubData(robot.controlHub);
-//        data.addHubData(robot.secondHub);
-
         double turn = deadZone(gamepad1.right_stick_x);
         double y = -deadZone(gamepad1.left_stick_y);
         double x = deadZone(gamepad1.left_stick_x);
         robot.driveTrain.spinDrive(x, y, turn);
-
-//        if (robot.stoneManipulator.getState() == State.RESTING) {
-//            whenPressedDebounce(() -> gamepad2.dpad_up, () -> robot.lift.moveUp(), 0);
-//            whenPressedDebounce(() -> gamepad2.dpad_down, () -> robot.lift.moveDown(), 1);
-//        }
-//        robot.lift.updatePosition();
-//        robot.lift.updateRightMotor();
-
-//        if (robot.lift.getLevel() == 0 && robot.stoneManipulator.getState() == State.RESTING && !robot.stoneManipulator.isGrabbed()) {
-            whenPressedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(1), 2);
-//        }
+        whenPressedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(1), 2);
         whenReleasedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(0), 3);
-
-//        if (robot.lift.getLevel() == 0 && robot.stoneManipulator.getState() == State.RESTING && !robot.stoneManipulator.isGrabbed()) {
-            whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(-1), 4);
-//        }
+        whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(-1), 4);
         whenReleasedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(0), 5);
-
-//        if (robot.stoneManipulator.getState() == State.RESTING && robot.stoneManipulator.isGrabbed()) {
-//            whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setExtended(true), 3);
-//        }
-//        if (robot.stoneManipulator.getState() == State.EXTENDED) {
-//            whenReleasedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setExtended(false), 3);
-//        }
-
-//        if (robot.stoneManipulator.getState() != State.INTAKING) {
-//            whenPressedDebounce(() -> gamepad2.a, () -> robot.stoneManipulator.setGrabbed(!robot.stoneManipulator.isGrabbed()), 4);
-//        }
 
         whenPressedDebounce(() -> gamepad2.x, () -> {
             foundationGrabbed = !foundationGrabbed;
             robot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, foundationGrabbed);
         }, 6);
-
-//        robot.driveTrain.updateLocation();
-
         telemetry.addData("Drive", "x:%f, y:%f, turn:%f", x, y, turn);
-//        telemetry.addData("Lift level", robot.lift.getLevel());
-//        telemetry.addData("Drive Base Location", robot.driveTrain.getLocation());
+        robot.lift.liftMove(gamepad2.left_stick_y);
 
+        telemetry.update();
     }
 
     /*

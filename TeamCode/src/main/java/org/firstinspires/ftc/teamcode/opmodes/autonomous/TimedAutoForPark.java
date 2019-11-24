@@ -2,15 +2,17 @@ package org.firstinspires.ftc.teamcode.opmodes.autonomous;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
-import org.westtorrancerobotics.lib.MecanumController;
-import org.westtorrancerobotics.lib.MecanumDrive;
+import org.westtorrancerobotics.lib.ftc.MecanumDriveImpl;
+import org.westtorrancerobotics.lib.hardware.drive.MecanumController;
+import org.westtorrancerobotics.lib.hardware.drive.MecanumDrive;
 
+@Disabled
 @Autonomous (name = "Timed Auto For Park", group = "none")
 public class TimedAutoForPark extends LinearOpMode {
 
@@ -38,7 +40,7 @@ public class TimedAutoForPark extends LinearOpMode {
         rightFront.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
         rightBack.setMode(DcMotorEx.RunMode.RUN_WITHOUT_ENCODER);
 
-        MecanumDrive train = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack, null);
+        MecanumDrive train = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack);
         driveTrain = new MecanumController(train);
 
         Servo Test = hardwareMap.get(Servo.class, "armTune");
