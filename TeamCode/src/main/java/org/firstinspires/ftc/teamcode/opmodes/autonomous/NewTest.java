@@ -123,12 +123,12 @@ public class NewTest extends LinearOpMode {
                 telemetry.update();
             }
 
-            driveDistance(30,Direction.BACKWARD);
+            driveDistance(20,Direction.BACKWARD);// Maybe a little more
 
             driveDistance(0,Direction.FORWARD);
             sleep(2000);
 
-            driveDistance(30,Direction.FORWARD);
+            driveDistance(20,Direction.FORWARD); //Maybe a little more
 
             driveDistance(0,Direction.FORWARD);
             sleep(2000);
