@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.teleop;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -20,6 +21,9 @@ public class MecanumTeleop extends LinearOpMode {
 
     // Declare OpMode members
     private ElapsedTime runtime = new ElapsedTime();
+
+    // Gyro
+    BNO055IMU backupGyro1;
 
     private DcMotor left1;
     private DcMotor left2;
@@ -46,6 +50,8 @@ public class MecanumTeleop extends LinearOpMode {
     public void runOpMode() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
+
+        backupGyro1 = hardwareMap.get(BNO055IMU.class, "imu1");
 
         left1 = hardwareMap.dcMotor.get("leftFront");
         left2 = hardwareMap.dcMotor.get("leftBack");
@@ -149,6 +155,8 @@ public class MecanumTeleop extends LinearOpMode {
             } else if (!gamepad2.x) {
                 prevPos = false;
             }
+            telemetry.addData("gyro: ",backupGyro1.getAngularOrientation());
+            telemetry.update();
         }
         if (gamepad2.a) {nubBig.setPosition(.9); nubLittle.setPosition(.9); isGrabbed = true;} else if (gamepad2.b) {nubBig.setPosition(.4); nubLittle.setPosition(.4); isGrabbed = false;}
     }

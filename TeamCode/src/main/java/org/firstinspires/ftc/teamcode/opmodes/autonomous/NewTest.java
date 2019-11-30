@@ -7,12 +7,15 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
 import org.westtorrancerobotics.lib.MecanumController;
 import org.westtorrancerobotics.lib.MecanumDrive;
+
+import static com.qualcomm.robotcore.util.ElapsedTime.Resolution;
 
 @Autonomous(name="NewTest", group="Linear Opmode")
 public class NewTest extends LinearOpMode {
@@ -109,28 +112,35 @@ public class NewTest extends LinearOpMode {
         intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        waitForStart();
-
-
+//.        waitForStart();
 
         runtime.reset();
-        runtime.startTime();
 
-        driveDistance(30,Direction.FORWARD);
+        while(opModeIsActive()){
 
-//
-//        while(opModeIsActive()) {
-//
-//            runtime.reset();
-//
-//            if (runtime.seconds() == 5){
-//                telemetry.addData("hi", 1);
-//            }
-//
-//            driveDistance(30,Direction.BACKWARD);
-//
-//
-//        }
+            if (runtime.seconds() == 5){
+                telemetry.addData("hi", 1);
+                telemetry.update();
+            }
+
+            driveDistance(30,Direction.BACKWARD);
+
+            driveDistance(0,Direction.FORWARD);
+            sleep(2000);
+
+            driveDistance(30,Direction.FORWARD);
+
+            driveDistance(0,Direction.FORWARD);
+            sleep(2000);
+
+            driveDistance(20,Direction.LEFT);
+
+            driveDistance(0,Direction.FORWARD);
+            sleep(2000);
+
+            driveDistance(20,Direction.RIGHT);
+
+        }
 
 
         //driveDistance(30,0,Direction.FORWARD);
@@ -181,7 +191,7 @@ public class NewTest extends LinearOpMode {
 
     double DistanceX = 36;
 
-    double POWEROVERDISTANCEX = power/DistanceX; //FORWARD MOVEMENT
+    double POWEROVERDISTANCEX = power/DistanceX; //FORWARD MOVEMENT (in what units?)
 
     double DistanceY = 25;
     double POWEROVERDISTANCEY = power/DistanceY; //SIDE TO SIDE MOVEMENT
@@ -280,7 +290,12 @@ public class NewTest extends LinearOpMode {
             right1.setPower(0);
             right2.setPower(0);
 
+            telemetry.addData("Direction: ", "Forward");
+            telemetry.addData("Encoder Y: ", intakeLeft.getCurrentPosition());
+            telemetry.update();
+
         }
+
         if(direction == Direction.BACKWARD){
             distanceToPower = POWEROVERDISTANCEX * distance;
 
@@ -296,6 +311,10 @@ public class NewTest extends LinearOpMode {
             right1.setPower(0);
             right2.setPower(0);
 
+            telemetry.addData("Direction: ", "Backward");
+            telemetry.update();
+
+
 
         }
 
@@ -307,7 +326,10 @@ public class NewTest extends LinearOpMode {
                 left2.setPower(distanceToPower);
                 right1.setPower(distanceToPower);
                 right2.setPower(-distanceToPower);
+                sleep(1000);
 
+                 telemetry.addData("Direction: ", "Left");
+                 telemetry.update();
 
         }
 
@@ -319,7 +341,10 @@ public class NewTest extends LinearOpMode {
                 left2.setPower(-distanceToPower);
                 right1.setPower(-distanceToPower);
                 right2.setPower(distanceToPower);
+                sleep(1000);
 
+            telemetry.addData("Direction: ", "Right");
+            telemetry.update();
         }
 
 
