@@ -1,6 +1,5 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
-import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.OpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
@@ -18,7 +17,6 @@ import java.text.DecimalFormat;
 @TeleOp(name="RUN THIS YOU MEERKAT", group="none")
 //@Disabled
 public class simpleOdo extends OpMode {
-    protected BNO055IMU Gyro1;
     private double orange;
     private double distance;
     private DcMotorEx leftFront;
@@ -97,9 +95,8 @@ public class simpleOdo extends OpMode {
         xyd = "(" + round.format(position[0]) + ", " + round.format(position[1]) + ", " + round.format(position[2]) + ")";
         distance = vEncoder2.getCurrentPosition();
         if (gamepad2.a) {vEncoder2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);}
-        orange = Gyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         telemetry.addData("degrees", orange);
-     //  telemetry.addData("x, y, heading", xyd);
+        telemetry.addData("x, y, heading", xyd);
         lastVertical1 = vertical1;
         lastVertical2 = vertical2;
         lastHorizontal = horizontal;

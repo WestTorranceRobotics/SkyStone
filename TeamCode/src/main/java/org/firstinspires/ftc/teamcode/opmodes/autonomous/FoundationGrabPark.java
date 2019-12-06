@@ -10,11 +10,15 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.opmodes.autonomous.meet1time.TimedAuto;
-
-import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.BOTH;
 
 @Autonomous(name = "CHANCE IS A MEERKAT", group = "none")
+/**
+ *
+ * Adjust turn / Drive speed to taste
+ *
+ * Speed should not impact distance traveled by a significant amount
+ *
+ */
 public class FoundationGrabPark extends LinearOpMode {
 
     private Robot bot;
@@ -26,6 +30,12 @@ public class FoundationGrabPark extends LinearOpMode {
     private final double DRIVE_SPEED = .5;
     private final double TURN_SPEED = .5;
     private final double TICKS_TO_INCHES = (2 * Math.PI) / 4096;
+    private DcMotorEx leftFront;
+    private DcMotorEx leftBack;
+    private DcMotorEx rightFront;
+    private DcMotorEx rightBack;
+    private double angleHeld = 0;
+    private double currentAngle = 0;
     @Override
     public void runOpMode() throws InterruptedException {
         bot = Robot.getInstance();
@@ -34,78 +44,132 @@ public class FoundationGrabPark extends LinearOpMode {
         vEncoder = hardwareMap.get(DcMotorEx.class, "intakeRight/odometerRightY");
         backupGyro1 = hardwareMap.get(BNO055IMU.class, "imu1");
         backupGyro1.initialize(new BNO055IMU.Parameters());
+        leftFront  = hardwareMap.get(DcMotorEx.class, "leftFront");
+        leftBack  = hardwareMap.get(DcMotorEx.class, "leftBack");
+        rightFront = hardwareMap.get(DcMotorEx.class, "rightFront");
+        rightBack = hardwareMap.get(DcMotorEx.class, "rightBack");
 
         waitForStart();
         resetEncoders();
-        while (distanceV < 13 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(0, -DRIVE_SPEED, 0);
-            getTelem();
+        getData();
+        angleHeld = currentAngle;
+        while (opModeIsActive()) {
+            getData();
+            if (currentAngle != angleHeld + .5 || currentAngle != angleHeld - .5 && currentAngle > 0)
+            {
+               bot.driveTrain.spinDrive(0, 0, TURN_SPEED);
+            }
+            else if (currentAngle != angleHeld + .5 || currentAngle != angleHeld - .5 && currentAngle < 0)
+                {
+                    bot.driveTrain.spinDrive(0, 0, -TURN_SPEED);
+                } else {
+                bot.driveTrain.spinDrive(DRIVE_SPEED, 0, 0);
+            }
         }
-        resetEncoders();
-        while (backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 31.799 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(0, 0, -TURN_SPEED);
-            getTelem();
-        }
-        resetEncoders();
-        while (distanceV < 17 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(0, -DRIVE_SPEED, 0);
-            getTelem();
-        }
-        resetEncoders();
-        while (backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 98.4872 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(0, 0, -TURN_SPEED);
-            getTelem();
-        }
-        resetEncoders();
-        while (distanceV < 6.445 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(0, DRIVE_SPEED, 0);
-            getTelem();
-        }
-        resetEncoders();
-        while (distanceH < 10 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(-DRIVE_SPEED, 0, 0);
-        }
-        resetEncoders();
-        while (backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle < 89.668 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(0, 0, -TURN_SPEED);
-            getTelem();
-        }
-        resetEncoders();
-        while (distanceH < 20.24 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(DRIVE_SPEED, 0, 0);
-            getTelem();
-        }
-        resetEncoders();
-        while (distanceV < 41.707 && opModeIsActive()) {
-            getDistance();
-            bot.driveTrain.spinDrive(0, -DRIVE_SPEED, 0);
-            getTelem();
-        }
-        resetEncoders();
 
 
     }
 
+    /**
+     * Call to reset Encoders
+     */
     private void resetEncoders() {
         vEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         hEncoder.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
     }
 
-    private void getDistance() {
+    /**
+     * Call to update distance
+     */
+    private void getData() {
         distanceV = vEncoder.getCurrentPosition() * TICKS_TO_INCHES;
         distanceH = hEncoder.getCurrentPosition() * TICKS_TO_INCHES;
-    } private void getTelem() {
+        currentAngle = backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+
+    }
+    /**
+     * Call to send telemetry
+     * getData must be called for data to update
+     */
+    private void getTelem() {
         telemetry.addData("distanceH", distanceH);
         telemetry.addData("distanceV", distanceV);
-        telemetry.addData("DEGREES", backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle);
+        telemetry.addData("DEGREES", currentAngle);
         telemetry.update();
+    }
+    /**
+     * Call for turning in auto (takes angle in degrees)
+     * NOT WORKING AT THIS MOMENT
+     */
+    private void actionTurn (double angle) {
+        double speed = 0;
+        speed = (angle < 0) ? TURN_SPEED : (angle > 0) ? -TURN_SPEED: -TURN_SPEED;
+        if (angle > 0) {} else if (angle < 0) {}  else {}
+        while ( angle < backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle && opModeIsActive()) {
+            getData();
+            bot.driveTrain.spinDrive(0, 0, 0);
+            getTelem();
+        }
+        resetEncoders();
+    }
+    /**
+     * Call for moving horizontally in auto (takes inches)
+     */
+    private void actionHorizontal (double inch) {
+        double speed = 0;
+        speed = (inch > 0) ? DRIVE_SPEED : (inch < 0) ? -DRIVE_SPEED: DRIVE_SPEED;
+        if (inch > 0)
+        {
+            while ( distanceV < inch && opModeIsActive()) {
+                getData();
+                bot.driveTrain.spinDrive(speed, 0, 0);
+                getTelem(); }
+        }
+        else if (inch < 0)
+        {
+            while ( distanceV > inch && opModeIsActive()) {
+                getData();
+                bot.driveTrain.spinDrive(speed, 0, 0);
+                getTelem(); }
+        }
+        else
+        {
+            while ( distanceV > inch && opModeIsActive()) {
+                getData();
+                bot.driveTrain.spinDrive(speed, 0, 0);
+                getTelem(); }
+        }
+        resetEncoders();
+    }
+    /**
+     * Call for moving vertically in auto (takes inches)
+     */
+    private void actionVertical (double inch) {
+        double speed = 0;
+        speed = (inch > 0) ? DRIVE_SPEED : (inch < 0) ? -DRIVE_SPEED: DRIVE_SPEED;
+        if (inch > 0)
+        {
+            while ( distanceV < inch && opModeIsActive()) {
+            getData();
+            bot.driveTrain.spinDrive(speed, 0, 0);
+            getTelem(); }
+        }
+        else if (inch < 0)
+        {
+            while ( distanceV > inch && opModeIsActive()) {
+                getData();
+                bot.driveTrain.spinDrive(speed, 0, 0);
+                getTelem(); }
+        }
+        else
+
+        {
+            while ( distanceV > inch && opModeIsActive()) {
+                getData();
+                bot.driveTrain.spinDrive(speed, 0, 0);
+                getTelem(); }
+        }
+
+        resetEncoders();
     }
 }
