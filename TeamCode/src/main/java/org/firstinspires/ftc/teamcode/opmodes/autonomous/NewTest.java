@@ -8,18 +8,17 @@ import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot;
+import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
-import org.westtorrancerobotics.lib.hardware.drive.MecanumController;
-import org.westtorrancerobotics.lib.hardware.drive.MecanumDrive;
+
+import static com.qualcomm.robotcore.util.ElapsedTime.Resolution;
 
 @Autonomous(name="NewTest", group="Linear Opmode")
 public class NewTest extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
-    private PositionTrackingAuto tracking = new PositionTrackingAuto();
-
-    Robot bot;
+    private Robot bot;
     // defining back right wheel
     private DcMotor left1;
     // defining back left wheel
@@ -59,10 +58,7 @@ public class NewTest extends LinearOpMode {
 //    private Servo nubGrabRight;
 //    // only for the nub grabber right
 //    private Servo nubGrabLeft;
-//    // only for the nub grabber left
-    double aParam = 315;
-    double bInvParam = 0.605;
-    double cParam = 169.7;
+//    // only for the nub grabber lef
 
     @Override
     public void runOpMode() {
@@ -73,14 +69,9 @@ public class NewTest extends LinearOpMode {
 
         bot.init(hardwareMap);
 
-        leftEye = new RevColorSensorV3(
-                hardwareMap.get(RevColorSensorV3.class, "ssColorLeft").getDeviceClient()
-        ) {
-            @Override
-            protected double inFromOptical(int rawOptical) {
-                return Math.pow((rawOptical - cParam) / aParam, -bInvParam);
-            }
-        };
+        bot.driveTrain.init(hardwareMap);
+
+        bot.foundationGrabber.init(hardwareMap);
 
         left1 = hardwareMap.dcMotor.get("leftFront");
         left2 = hardwareMap.dcMotor.get("leftBack");
@@ -105,30 +96,63 @@ public class NewTest extends LinearOpMode {
         left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         left2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+
         intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        double leftSight = bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT);
-        double rightSight = bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT);
-        telemetry.addData("Distance: Left ", leftSight);
-        telemetry.addData("Distance: Right", rightSight);
 
         waitForStart();
 
+        telemetry.addData("hi",1);
+        telemetry.update();
+
         runtime.reset();
-        runtime.startTime();
 
-        driveDistance(0, 30,Direction.FORWARD);
+        driveDistance(25,Direction.LEFT,2000);
 
-        while(opModeIsActive()) {
-//            telemetry.addData("RED", bot.driveTrain.lineSpotter.red());
-//            telemetry.addData("BLUE", bot.driveTrain.lineSpotter.blue());
-//            telemetry.addData("GREEN", bot.driveTrain.lineSpotter.green());
-            telemetry.update();
-        }
+//        while (opModeIsActive()) {
+//
+//            if (runtime.seconds() == 5) {
+//                telemetry.addData("hi", 1);
+//                telemetry.update();
+//            }
+//
+//            driveDistance(22, Direction.BACKWARD,1000);// Maybe a little more
+//
+//            driveDistance(0, Direction.FORWARD,2000);
+//
+//            double left = bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT);
+//            double right = bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT);
+//            sleep(1000);
+//
+//            while (true) {
+//                if (seeing(left, right) == true) {
+//                    break;
+//                } else {
+//                    driveDistance(10, Direction.RIGHT, 1000);
+//                    driveDistance(0, Direction.FORWARD, 1000);
+//                }
+//            }
+//
+//            driveDistance(15, Direction.FORWARD,1000); //Maybe a little more
+//
+//            driveDistance(0, Direction.FORWARD,2000);
+//
+//            driveDistance(60, Direction.LEFT,5000);
+//
+//            driveDistance(0,Direction.FORWARD, 2000);
+//
+//            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
+//
+//            while (bot.driveTrain.onBlueLine() != true) {
+//                driveDistance(10, Direction.RIGHT, 1000);
+//                break;
+//            }
+//
+//        }
 
 
-        driveDistance(30,0,Direction.FORWARD);
+        //driveDistance(30,0,Direction.FORWARD);
 
 //        while (opModeIsActive()) {
 //            movement(30,0.8,0.8,0.8,0.8,5);
@@ -169,23 +193,22 @@ public class NewTest extends LinearOpMode {
     double TIMEY = 0;
     double DISTANCEY = 0;
 
-    double convertX = TIMEX/DISTANCEX;
-    double convertY = TIMEY/DISTANCEY;
+    double convertX = TIMEX / DISTANCEX;
+    double convertY = TIMEY / DISTANCEY;
 
-    double power = 0.8;
+    double power = 0.8 * 1000; //power *milliseconds
 
     double DistanceX = 36;
 
-    double POWEROVERDISTANCEX = power/DistanceX; //FORWARD MOVEMENT
+    double POWEROVERDISTANCEX = power / DistanceX; //FORWARD MOVEMENT (in what units?) in
 
     double DistanceY = 25;
-    double POWEROVERDISTANCEY = power/DistanceY; //SIDE TO SIDE MOVEMENT
-
+    double POWEROVERDISTANCEY = power / DistanceY; //SIDE TO SIDE MOVEMENT in
 
 
     void straightMovement(int inches, double L1, double L2, double R1, double R2) {
 
-        int currentPosLeft =  intakeLeft.getCurrentPosition();
+        int currentPosLeft = intakeLeft.getCurrentPosition();
         // insert name of left odometry wheel
         int currentPosRight = intakeRight.getCurrentPosition();
 
@@ -210,12 +233,9 @@ public class NewTest extends LinearOpMode {
         left2.setPower(L2);
         right1.setPower(R1);
         right2.setPower(R2);
-
-
     }
 
-
-
+/*
     void sideToSide(int inches, double L1, double L2, double R1, double R2) {
 
         int currentPosLeft = intakeLeft.getCurrentPosition();
@@ -239,105 +259,120 @@ public class NewTest extends LinearOpMode {
             right1.setPower(0);
             right2.setPower(0);
         }
-}
-        boolean seeing (double left, double right) {
-            if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.RIGHT, right)) {
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
-                return true;
-            }
-            if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.LEFT, left)) {
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
-                return true;
-            } else {
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, false);
-                return false;
-            }
+    }
+    */
+
+
+    boolean seeing (double left, double right) {
+        if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.RIGHT, right)) {
+            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+            return true;
+        }
+        if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.LEFT, left)) {
+            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
+            return true;
+        } else {
+            return false;
+        }
     }
 
-        public void driveDistance(double x, double y, Direction direction){
-
-            double distance = Math.hypot(x, y);
-
-            double timeX = distance * convertX;
-
-            double timeY = distance * convertY;
-
-            double rate = distance/timeX;
+    public void driveDistance(double distance, Direction direction, int time) {
 
         double distanceToPower;
 
         runtime.reset();
 
-        if(direction == Direction.FORWARD){
-            distanceToPower = POWEROVERDISTANCEX * distance;
+        /* Forward Direction */
+        if (direction == Direction.FORWARD) {
+            distanceToPower = POWEROVERDISTANCEX * (distance/time);
 
+            if (distanceToPower > 1){
+                telemetry.addData("dumb boi", 1);
+                distanceToPower = 0;
+            }
 
             left1.setPower(distanceToPower);
             left2.setPower(distanceToPower);
             right1.setPower(distanceToPower);
             right2.setPower(distanceToPower);
-            sleep(1000);
+            sleep(time);
 
             left1.setPower(0);
             left2.setPower(0);
             right1.setPower(0);
             right2.setPower(0);
 
-        }
-        if(direction == Direction.BACKWARD){
-            distanceToPower = POWEROVERDISTANCEX * distance;
+            telemetry.addData("Power", distanceToPower);
+            telemetry.update();
 
+        }
+
+        /* Backward Direction */
+        if (direction == Direction.BACKWARD) {
+            distanceToPower = POWEROVERDISTANCEX * (distance/time);
+
+            if (distanceToPower > 1){
+                telemetry.addData("dumb boi", 1);
+                distanceToPower = 0;
+            }
 
             left1.setPower(-distanceToPower);
             left2.setPower(-distanceToPower);
             right1.setPower(-distanceToPower);
             right2.setPower(-distanceToPower);
-            sleep(1000);
+            sleep(time);
 
             left1.setPower(0);
             left2.setPower(0);
             right1.setPower(0);
             right2.setPower(0);
 
+            telemetry.addData("Direction: ", "Backward");
+            telemetry.update();
+
 
         }
+        /* Left Direction */
+        if (direction == Direction.LEFT) {
+            distanceToPower = POWEROVERDISTANCEY * (distance/time);
 
-        if(direction == Direction.LEFT){
-            distanceToPower = POWEROVERDISTANCEY * distance;
-
-                while (runtime.seconds() != timeY) {
-
-                    left1.setPower(-distanceToPower);
-                    left2.setPower(distanceToPower);
-                    right1.setPower(distanceToPower);
-                    right2.setPower(-distanceToPower);
-
-                }
+            if (distanceToPower > 1){
+                telemetry.addData("dumb boi", 1);
+                distanceToPower = 0;
             }
 
-            if(direction == Direction.RIGHT){
+            left1.setPower(-distanceToPower);
+            left2.setPower(distanceToPower);
+            right1.setPower(distanceToPower);
+            right2.setPower(-distanceToPower);
+            sleep(time);
 
-                distanceToPower = POWEROVERDISTANCEY * distance;
-
-                while (runtime.seconds() != timeY){
-                    left1.setPower(distanceToPower);
-                    left2.setPower(-distanceToPower);
-                    right1.setPower(-distanceToPower);
-                    right2.setPower(distanceToPower);
-                }
-
-            }
-
-            left1.setPower(0);
-            left2.setPower(0);
-            right1.setPower(0);
-            right2.setPower(0);
-
+            telemetry.addData("Direction: ", "Left");
+            telemetry.update();
         }
+        /* Right Direction */
+        if (direction == Direction.RIGHT) {
+
+            distanceToPower = POWEROVERDISTANCEY * (distance/time);
+
+            if (distanceToPower > 1){
+                telemetry.addData("dumb boi", 1);
+                distanceToPower = 0;
+            }
+
+            left1.setPower(distanceToPower);
+            left2.setPower(-distanceToPower);
+            right1.setPower(-distanceToPower);
+            right2.setPower(distanceToPower);
+            sleep(time);
+
+            telemetry.addData("Direction: ", "Right");
+            telemetry.update();
+        }
+    }
 
 
-
-     public void forwardMovement(double distance) {
+    public void forwardMovement(double distance) {
 
         //Can be backwards too.
 
@@ -357,14 +392,12 @@ public class NewTest extends LinearOpMode {
         left2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         right1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         right2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+    }
 
-     }
-
-    enum Direction{
+    enum Direction {
         LEFT,
         RIGHT,
         FORWARD,
         BACKWARD
     }
 }
-

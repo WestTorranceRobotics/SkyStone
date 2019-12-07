@@ -81,6 +81,14 @@ public class IanTest extends LinearOpMode {
 
         runtime.reset();
 
+        while (1 == 1) {
+            telemetry.addData("leftOdo1", left1.getCurrentPosition());
+            telemetry.addData("leftOdo2", left2.getCurrentPosition());
+            telemetry.addData("rightOdo1", right1.getCurrentPosition());
+            telemetry.addData("rightOdo2", right2.getCurrentPosition());
+            telemetry.update();
+        }
+
 
     }
 

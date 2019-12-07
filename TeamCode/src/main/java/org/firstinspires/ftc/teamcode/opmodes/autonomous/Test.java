@@ -145,7 +145,6 @@ public class Test extends LinearOpMode {
     }
 
 
-
     int NUM_OF_TICKS = 4096;
     double PI = 3.14159265358979323;
     int WHEEL_DIAMETER = 2;
@@ -178,8 +177,6 @@ public class Test extends LinearOpMode {
         left2.setPower(L2);
         right1.setPower(R1);
         right2.setPower(R2);
-
-
 
     }
 
