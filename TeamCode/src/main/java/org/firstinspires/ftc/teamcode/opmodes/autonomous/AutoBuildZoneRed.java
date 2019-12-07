@@ -36,6 +36,7 @@ public class AutoBuildZoneRed extends LinearOpMode {
         bot.driveTrain.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         bot.driveTrain.setLocation(new Location(24 * 3 - 9, 24 * 3 - 9,
                 new Angle(180, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)));
+
         // start pushed into the corner, in the blue build site, facing toward the opponent driver station
 
         waitForStart();

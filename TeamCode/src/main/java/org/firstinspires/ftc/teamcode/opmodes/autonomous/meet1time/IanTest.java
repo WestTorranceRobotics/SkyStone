@@ -2,15 +2,20 @@ package org.firstinspires.ftc.teamcode.opmodes.autonomous.meet1time;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
+import com.qualcomm.robotcore.eventloop.opmode.Disabled;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+import com.qualcomm.robotcore.eventloop.opmode.OpMode;
+import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.teamcode.Robot;
 
-@Autonomous(name="NewTest", group="Linear Opmode")
-public class IanTest extends LinearOpMode {
+
+@TeleOp(name="IanTest", group="none")
+@Disabled
+public class IanTest extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
     private Robot bot;
@@ -21,24 +26,14 @@ public class IanTest extends LinearOpMode {
     private DcMotor right2;
     private RevColorSensorV3 leftEye;
 
-
-//    private ColorSensor color;
-//    // only for encoder use
-
     private DcMotor intakeLeft;
     private DcMotor intakeRight;
 
-    //    // only for motor outtake right motor
-//    private Servo outtakeLeft;
-//    // only for motor outtake left
-//    private Servo outtakeRight;
-//    // only for motor outtake right
-//
     private DcMotor liftRight;
     private DcMotor liftLeft;
 
     @Override
-    public void runOpMode(){
+    public void init() {
         telemetry.addData("Status", "Initialized");
         telemetry.update();
 
@@ -58,9 +53,6 @@ public class IanTest extends LinearOpMode {
         intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
         intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
 
-//        outtakeLeft = hardwareMap.servo.get("outtakeLeft");
-//        outtakeRight = hardwareMap.servo.get("outtakeRight");
-//
         liftLeft = hardwareMap.dcMotor.get("liftLeft");
         liftRight = hardwareMap.dcMotor.get("liftRight/odometerX");
 
@@ -77,20 +69,47 @@ public class IanTest extends LinearOpMode {
         intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        waitForStart();
-
-        runtime.reset();
-
-        while (1 == 1) {
+        double power = 0;
+    }
+        @Override
+        public void loop() {
             telemetry.addData("leftOdo1", left1.getCurrentPosition());
             telemetry.addData("leftOdo2", left2.getCurrentPosition());
             telemetry.addData("rightOdo1", right1.getCurrentPosition());
             telemetry.addData("rightOdo2", right2.getCurrentPosition());
+            telemetry.addData("Power", power);
             telemetry.update();
+
+            if (gamepad1.x) {
+                power += 0.1;
+            }
+            if (gamepad1.y) {
+                power -= 0.1;
+            }
+
+            if (gamepad1.a) {
+                driveDistance(power);
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    Thread.currentThread().interrupt();
+                }
+
+                left1.setPower(0);
+                left2.setPower(0);
+                right1.setPower(0);
+                right2.setPower(0);
+
+            }
+
+            if (power > 1) {
+                power = 1;
+            }
+            else if (power < -1) {
+                power = -1;
+            }
         }
-
-
-    }
 
     int NUM_OF_TICKS = 4096;
     double PI = 3.14159265358979323;
@@ -120,6 +139,13 @@ public class IanTest extends LinearOpMode {
         if (direction == Direction.LEFT) {
             left1.getCurrentPosition();
         }
+    }
+
+    void driveDistance(double power) {
+        left1.setPower(power);
+        left2.setPower(power);
+        right1.setPower(power);
+        right2.setPower(power);
     }
 
     enum Direction {

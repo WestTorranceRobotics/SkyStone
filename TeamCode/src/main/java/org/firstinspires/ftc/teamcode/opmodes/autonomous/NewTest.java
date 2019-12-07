@@ -108,7 +108,13 @@ public class NewTest extends LinearOpMode {
 
         runtime.reset();
 
-        driveDistance(25,Direction.LEFT,2000);
+
+        left1.setPower(0.2);
+        left2.setPower(0.2);
+        right1.setPower(0.2);
+        right2.setPower(0.2);
+        sleep(1000);
+
 
 //        while (opModeIsActive()) {
 //
