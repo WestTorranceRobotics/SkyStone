@@ -117,7 +117,7 @@ public class NewTest extends LinearOpMode {
                 telemetry.update();
             }
 
-            driveDistance(20, Direction.BACKWARD,1000);// Maybe a little more
+            driveDistance(22, Direction.BACKWARD,1000);// Maybe a little more
 
             driveDistance(0, Direction.FORWARD,2000);
 
@@ -128,23 +128,23 @@ public class NewTest extends LinearOpMode {
                 if (seeing(left, right) == true) {
                     break;
                 } else {
-                    driveDistance(5, Direction.RIGHT, 1000);
+                    driveDistance(10, Direction.RIGHT, 1000);
                     driveDistance(0, Direction.FORWARD, 1000);
                 }
             }
 
-            driveDistance(15, Direction.FORWARD,1000); //Maybe a little more
+            driveDistance(15, Direction.FORWARD,1000);
 
             driveDistance(0, Direction.FORWARD,2000);
 
-            driveDistance(60, Direction.LEFT,5000);
+            driveDistance(120, Direction.LEFT,5000);
 
             driveDistance(0,Direction.FORWARD, 2000);
 
             bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
             while (bot.driveTrain.onBlueLine() != true) {
-                driveDistance(5, Direction.RIGHT, 1000);
+                driveDistance(10, Direction.RIGHT, 1000);
             }
 
         }
