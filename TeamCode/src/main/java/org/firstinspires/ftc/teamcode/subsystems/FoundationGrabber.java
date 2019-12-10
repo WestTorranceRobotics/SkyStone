@@ -12,18 +12,16 @@ import org.westtorrancerobotics.lib.ftc.ButtonAndEncoderData;
 public class FoundationGrabber {
 
     private Servo leftHook;
-    private RevTouchSensor leftBlock;
     private RevColorSensorV3 leftEye;
     private Servo rightHook;
-    private RevTouchSensor rightBlock;
     private RevColorSensorV3 rightEye;
     private RevTouchSensor frontTouch;
     private RevTouchSensor sideTouch;
 
     private final double LEFT_GRABBED_POSITION = 0.31;
-    private final double LEFT_UNGRABBED_POSITION = 0.847;
+    private final double LEFT_UNGRABBED_POSITION = 0.831;
     private final double RIGHT_GRABBED_POSITION = 0.61;
-    private final double RIGHT_UNGRABBED_POSITION = 0.076;
+    private final double RIGHT_UNGRABBED_POSITION = 0.056;
 
     private final double RED_TO_BLUE_THRESHOLD = 1.5;
     private final double GREEN_TO_BLUE_THRESHOLD = 2.25;
@@ -39,7 +37,6 @@ public class FoundationGrabber {
 
     public void init(HardwareMap hardwareMap) {
         leftHook = hardwareMap.get(Servo.class, "foundationHookLeft");
-        leftBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchLeft");
 
         double aParam = 519.837;
         double bInvParam = 0.467;
@@ -55,8 +52,6 @@ public class FoundationGrabber {
         };
 
         rightHook = hardwareMap.get(Servo.class, "foundationHookRight");
-        rightBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchRight");
-
 
         rightEye = new RevColorSensorV3(
                 hardwareMap.get(RevColorSensorV3.class, "ssColorRight").getDeviceClient()
@@ -83,23 +78,6 @@ public class FoundationGrabber {
                 leftHook.setPosition(grabbed ? LEFT_GRABBED_POSITION : LEFT_UNGRABBED_POSITION);
                 rightHook.setPosition(grabbed ? RIGHT_GRABBED_POSITION : RIGHT_UNGRABBED_POSITION);
                 break;
-            default:
-                throw new IllegalArgumentException("Unknown or invalid hook " + hook + " provided.");
-        }
-    }
-
-    public boolean isGrabbedOnButton(Hook hook) {
-        switch (hook) {
-            case LEFT:
-                return ButtonAndEncoderData.getLatest().isPressed(leftBlock);
-            case RIGHT:
-                return ButtonAndEncoderData.getLatest().isPressed(rightBlock);
-            case BOTH:
-                return ButtonAndEncoderData.getLatest().isPressed(leftBlock)
-                        && ButtonAndEncoderData.getLatest().isPressed(rightBlock);
-            case EITHER:
-                return ButtonAndEncoderData.getLatest().isPressed(leftBlock)
-                        || ButtonAndEncoderData.getLatest().isPressed(rightBlock);
             default:
                 throw new IllegalArgumentException("Unknown or invalid hook " + hook + " provided.");
         }

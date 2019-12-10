@@ -9,7 +9,6 @@ import org.firstinspires.ftc.teamcode.Robot;
 
 import static org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber.Hook.BOTH;
 
-@Autonomous(name = "Drive Left Red Line")
 public class myOriginalAuto extends OpMode {
     Robot bot;
 

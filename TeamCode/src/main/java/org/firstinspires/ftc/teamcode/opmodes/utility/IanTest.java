@@ -1,4 +1,4 @@
-package org.firstinspires.ftc.teamcode.opmodes.teleop;
+package org.firstinspires.ftc.teamcode.opmodes.utility;
 
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
@@ -14,7 +14,6 @@ import org.firstinspires.ftc.teamcode.Robot;
 
 
 @TeleOp(name="IanTest", group="none")
-@Disabled
 public class IanTest extends OpMode {
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -71,6 +70,21 @@ public class IanTest extends OpMode {
 
         double power = 0;
     }
+
+    @Override
+    public void init_loop() {
+        telemetry.addData("Idling...", "...");
+        telemetry.update();
+    }
+
+    @Override
+    public void start() {
+        bot.runtime.reset();
+
+        telemetry.addData("Status", "Lift Initialized.");
+        telemetry.update();
+    }
+
         @Override
         public void loop() {
             telemetry.addData("leftOdo1", left1.getCurrentPosition());
@@ -110,6 +124,11 @@ public class IanTest extends OpMode {
                 power = -1;
             }
         }
+
+    @Override
+    public void stop() {
+        bot.close();
+    }
 
     int NUM_OF_TICKS = 4096;
     double PI = 3.14159265358979323;

@@ -39,7 +39,6 @@ import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
 
 @TeleOp(name="Two Drivers", group="none")
-@Disabled
 public class OfficialTeleop extends OpMode {
 
     private Robot robot;
@@ -115,7 +114,7 @@ public class OfficialTeleop extends OpMode {
         robot.driveTrain.spinDrive(x, y, turn);
         whenPressedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(1), 2);
         whenReleasedDebounce(() -> gamepad2.right_bumper, () -> robot.stoneManipulator.setIntake(0), 3);
-        whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(-1), 4);
+        whenPressedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(-0.2), 4);
         whenReleasedDebounce(() -> gamepad2.left_bumper, () -> robot.stoneManipulator.setIntake(0), 5);
 
         whenPressedDebounce(() -> gamepad2.x, () -> {
@@ -123,7 +122,7 @@ public class OfficialTeleop extends OpMode {
             robot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, foundationGrabbed);
         }, 6);
         telemetry.addData("Drive", "x:%f, y:%f, turn:%f", x, y, turn);
-        robot.lift.liftMove(gamepad2.left_stick_y);
+        //+robot.lift.liftMove(gamepad2.left_stick_y);
 
         telemetry.update();
     }

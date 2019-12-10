@@ -65,7 +65,7 @@ public class StoneManipulator {
         }
         leftIntake.setPower(power);
         rightIntake.setPower(power);
-        currentState = (power != 0) ? State.INTAKING : (power==0) ? State.RESTING: currentState;
+        currentState = (power != 0) ? State.INTAKING : State.RESTING;
         return currentState;
     }
 

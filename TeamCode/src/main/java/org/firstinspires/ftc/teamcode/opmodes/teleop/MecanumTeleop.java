@@ -134,20 +134,19 @@ public class MecanumTeleop extends LinearOpMode {
                 liftLeft.setPower(-.25);
             }
             else {
-               liftRight.setPower(.33);
-               liftLeft.setPower(.33);
+               liftRight.setPower(0);
+               liftLeft.setPower(0);
             }
 
             if (!prevPos && gamepad2.x) {
                 if (!pos) {
                     grabRight.setPosition(.753);
                     grabLeft.setPosition(.159);
-                    pos = !pos;
                 } else {
                     grabRight.setPosition(0.220);
                     grabLeft.setPosition(0.665);
-                    pos = !pos;
                 }
+                pos = !pos;
                 prevPos = true;
             } else if (!gamepad2.x) {
                 prevPos = false;
