@@ -31,6 +31,8 @@ public class IanTest extends OpMode {
     private DcMotor liftRight;
     private DcMotor liftLeft;
 
+    double power = 0;
+
     @Override
     public void init() {
         telemetry.addData("Status", "Initialized");
@@ -68,7 +70,7 @@ public class IanTest extends OpMode {
         intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        double power = 0;
+
     }
 
     @Override
@@ -83,6 +85,7 @@ public class IanTest extends OpMode {
 
         telemetry.addData("Status", "Lift Initialized.");
         telemetry.update();
+
     }
 
         @Override
@@ -144,14 +147,14 @@ public class IanTest extends OpMode {
     double convertX = TIMEX / DISTANCEX;
     double convertY = TIMEY / DISTANCEY;
 
-    double power = 0.8 * 1000; //power *milliseconds
+    //double power = 0.8 * 1000; //power *milliseconds
 
     double DistanceX = 36;
 
-    double POWEROVERDISTANCEX = power / DistanceX; //FORWARD MOVEMENT (in what units?) in
+    //double POWEROVERDISTANCEX = power / DistanceX; //FORWARD MOVEMENT (in what units?) in
 
     double DistanceY = 25;
-    double POWEROVERDISTANCEY = power / DistanceY; //SIDE TO SIDE MOVEMENT in
+    //double POWEROVERDISTANCEY = power / DistanceY; //SIDE TO SIDE MOVEMENT in
 
     void movement(Direction direction) {
 
