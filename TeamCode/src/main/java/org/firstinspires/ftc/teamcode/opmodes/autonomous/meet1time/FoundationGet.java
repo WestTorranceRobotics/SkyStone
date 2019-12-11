@@ -16,6 +16,8 @@ public class FoundationGet extends LinearOpMode {
         bot.init(hardwareMap);
         waitForStart();
         bot.runtime.reset();
+
+
         Angle initGyro = bot.driveTrain.gyro();
         while (bot.runtime.seconds() < 0.7) {
             telemetry.addData("Status", "Aligning with foundation");
