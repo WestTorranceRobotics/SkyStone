@@ -91,6 +91,10 @@ public class DriveTrain {
         mecanumController.spinDrive(ang, speed, turn, MecanumDrive.TranslTurnMethod.EQUAL_SPEED_RATIOS);
     }
 
+    public void forceTranslate(double x, double y, double gyroTarget) {
+        spinDrive(x, y, Math.sqrt(Math.abs(gyro() - gyroTarget)) / 9 * Math.signum(gyro() - gyroTarget));
+    }
+
     public void updateLocation() {
         odometer.update();
     }
