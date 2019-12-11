@@ -9,6 +9,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
 
+import java.util.function.BooleanSupplier;
+import java.util.function.DoublePredicate;
+
 public class FoundationGrabber {
 
     private Servo leftHook;
@@ -17,7 +20,6 @@ public class FoundationGrabber {
     private Servo rightHook;
     private RevTouchSensor rightBlock;
     private RevColorSensorV3 rightEye;
-
     private RevTouchSensor frontTouch;
     private RevTouchSensor sideTouch;
 
@@ -26,9 +28,9 @@ public class FoundationGrabber {
     private final double RIGHT_GRABBED_POSITION = 0.61;
     private final double RIGHT_UNGRABBED_POSITION = 0.076;
 
-    private final double RED_TO_BLUE_THRESHOLD = 1.5;
-    private final double GREEN_TO_BLUE_THRESHOLD = 2.25;
-    private final double MAX_STONE_VISIBLE_DISTANCE_IN = 5;
+    private final double RED_TO_BLUE_THRESHOLD = 1.6;
+    private final double GREEN_TO_BLUE_THRESHOLD = 2.5;
+    private final double MAX_STONE_VISIBLE_DISTANCE_IN = 4;
 
     private static FoundationGrabber instance = null;
 
@@ -42,28 +44,34 @@ public class FoundationGrabber {
         leftHook = hardwareMap.get(Servo.class, "foundationHookLeft");
         leftBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchLeft");
 
-        double aParam = 315;
-        double bInvParam = 0.605;
-        double cParam = 169.7;
+        double aParam = 519.837;
+        double bInvParam = 0.467;
+        double cParam = 175.572;
+        double dParam = -0.753;
         leftEye = new RevColorSensorV3(
                 hardwareMap.get(RevColorSensorV3.class, "ssColorLeft").getDeviceClient()
         ) {
             @Override
             protected double inFromOptical(int rawOptical) {
-                return Math.pow((rawOptical - cParam) / aParam, -bInvParam);
+                if (rawOptical <= cParam) {
+                    return Double.POSITIVE_INFINITY;
+                }
+                return Math.pow((rawOptical - cParam) / aParam, -bInvParam) + dParam;
             }
         };
 
         rightHook = hardwareMap.get(Servo.class, "foundationHookRight");
         rightBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchRight");
 
-
         rightEye = new RevColorSensorV3(
                 hardwareMap.get(RevColorSensorV3.class, "ssColorRight").getDeviceClient()
         ) {
             @Override
             protected double inFromOptical(int rawOptical) {
-                return Math.pow((rawOptical - cParam) / aParam, -bInvParam);
+                if (rawOptical <= cParam) {
+                    return Double.POSITIVE_INFINITY;
+                }
+                return Math.pow((rawOptical - cParam) / aParam, -bInvParam) + dParam;
             }
         };
 
@@ -129,6 +137,21 @@ public class FoundationGrabber {
                 return leftEye.getDistance(DistanceUnit.INCH);
             case RIGHT:
                 return rightEye.getDistance(DistanceUnit.INCH);
+            default:
+                throw new IllegalArgumentException("Unknown or invalid hook " + hook + " provided.");
+        }
+    }
+
+    public boolean getDistancePredicated(Hook hook, DoublePredicate predicate) {
+        switch (hook) {
+            case LEFT:
+                return predicate.test(getDistance(Hook.LEFT));
+            case RIGHT:
+                return predicate.test(getDistance(Hook.RIGHT));
+            case EITHER:
+                return predicate.test(getDistance(Hook.LEFT)) || predicate.test(getDistance(Hook.RIGHT));
+            case BOTH:
+                return predicate.test(getDistance(Hook.LEFT)) && predicate.test(getDistance(Hook.RIGHT));
             default:
                 throw new IllegalArgumentException("Unknown or invalid hook " + hook + " provided.");
         }

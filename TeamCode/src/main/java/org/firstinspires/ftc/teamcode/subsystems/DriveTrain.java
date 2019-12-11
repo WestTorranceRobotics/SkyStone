@@ -1,12 +1,15 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.robotcore.hardware.ColorSensor;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.firstinspires.ftc.teamcode.lib.ButtonAndEncoderData;
+import org.firstinspires.ftc.teamcode.lib.FtcTestableGyroFactory;
 import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
+import org.firstinspires.ftc.teamcode.lib.TestableGyro;
 import org.westtorrancerobotics.lib.Angle;
 import org.westtorrancerobotics.lib.Location;
 import org.westtorrancerobotics.lib.MecanumController;
@@ -23,6 +26,8 @@ public class DriveTrain {
     public ColorSensor lineSpotter;
     private static final int RED_THRESHOLD  = 1600;
     private static final int BLUE_THRESHOLD = 1600;
+
+    private TestableGyro imus;
 
     private Odometer odometer;
 
@@ -51,6 +56,34 @@ public class DriveTrain {
         rightBack.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
         lineSpotter = hardwareMap.get(ColorSensor.class, "lineColor");
+
+        BNO055IMU backupGyro1 = hardwareMap.get(BNO055IMU.class, "imu1");
+        BNO055IMU backupGyro2 = hardwareMap.get(BNO055IMU.class, "imu2");
+        BNO055IMU.Parameters params = new BNO055IMU.Parameters();
+        params.calibrationDataFile = null;//gyro 1 config when made
+        backupGyro1.initialize(params);
+        params.calibrationDataFile = null;//gyro 2 config when made
+        backupGyro2.initialize(params);
+
+        TestableGyro imu1 = FtcTestableGyroFactory.generate(backupGyro1);
+        TestableGyro imu2 = FtcTestableGyroFactory.generate(backupGyro2);
+        imu1.isWorking();
+        imu1.getHeading();
+        imu2.isWorking();
+        imu2.getHeading();
+        imus = new TestableGyro() {
+            @Override
+            public Angle getHeading() {
+                return imu1.isWorking() ? imu1.getHeading() : imu2.isWorking() ? imu2.getHeading() : imu1.getHeading();
+            }
+
+            @Override
+            public boolean isWorking() {
+                return imu1.isWorking() || imu2.isWorking();
+            }
+        };
+
+        gyro();
 
         MecanumDrive wheels = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack, null);
         mecanumController = new MecanumController(wheels);
@@ -99,6 +132,17 @@ public class DriveTrain {
 
     public boolean onBlueLine() {
         return lineSpotter.blue() > BLUE_THRESHOLD;
+    }
+
+    public Angle gyro() {
+        return imus.getHeading();
+    }
+
+    public void holdDirTranslate(double x, double y, Angle targetDir) {
+        double gyro = Angle.difference(targetDir, gyro(), Angle.AngleOrientation.COMPASS_HEADING)
+                .getValue(Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);
+        gyro = 0;
+        spinDrive(x, y, Math.sqrt(Math.abs(gyro)) / 9 * Math.signum(gyro));
     }
 
     private static class Odometer {
