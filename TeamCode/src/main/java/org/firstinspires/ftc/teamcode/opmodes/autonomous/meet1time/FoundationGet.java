@@ -24,10 +24,21 @@ public class FoundationGet extends LinearOpMode {
                 return;
             }
         }
-        while (bot.runtime.seconds() < 0.7) {
+        bot.runtime.reset();
+        while (bot.runtime.seconds() < 1.5) {
             telemetry.addData("Status", "Aligning with foundation");
+            telemetry.addData("Button", bot.foundationGrabber.frontTouchingFoundation());
             telemetry.update();
-            bot.driveTrain.forceTranslate(-1,0, initGyro);
+            bot.driveTrain.forceTranslate(0,-1, initGyro);
+            if (!opModeIsActive()) {
+                return;
+            }
+        }
+        while (!Thread.currentThread().isInterrupted()) {
+            telemetry.addData("Status", "Showing Button");
+            telemetry.addData("Button", bot.foundationGrabber.frontTouchingFoundation());
+            telemetry.update();
+            bot.driveTrain.forceTranslate(0,0, initGyro);
             if (!opModeIsActive()) {
                 return;
             }
