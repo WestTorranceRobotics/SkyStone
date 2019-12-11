@@ -6,7 +6,7 @@ public class TestableGyroFactory {
     
     private TestableGyroFactory() {} // no constructor
     
-    static TestableGyro generate(TestableGyro... gyros) {
+    public static TestableGyro generate(TestableGyro... gyros) {
         return new TestableGyro() {
             @Override
             public Angle getHeading() {
@@ -30,7 +30,7 @@ public class TestableGyroFactory {
         };
     }
 
-    TestableGyro NULL = new TestableGyro() {
+    public static TestableGyro NULL = new TestableGyro() {
         @Override
         public Angle getHeading() {
             return new Angle(0, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);

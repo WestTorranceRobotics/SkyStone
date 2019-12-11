@@ -9,7 +9,7 @@ import com.qualcomm.robotcore.util.ElapsedTime;
 
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.westtorrancerobotics.lib.ftc.ButtonAndEncoderData;
-import org.westtorrancerobotics.lib.ftc.PidfController;
+import org.westtorrancerobotics.lib.hardware.PidfController;
 
 import java.util.function.DoubleUnaryOperator;
 

@@ -6,13 +6,14 @@ import com.qualcomm.hardware.modernrobotics.ModernRoboticsI2cGyro;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
+import org.westtorrancerobotics.lib.hardware.sensors.TestableGyro;
 import org.westtorrancerobotics.lib.spline.geom.Angle;
 
 public class FtcTestableGyroFactory {
 
     private FtcTestableGyroFactory() {} // no constructor
 
-    static TestableGyro generate(BNO055IMU gyro) {
+    public static TestableGyro generate(BNO055IMU gyro) {
         return new TestableGyro() {
             @Override
             public Angle getHeading() {
@@ -28,7 +29,7 @@ public class FtcTestableGyroFactory {
         };
     }
 
-    static TestableGyro generate(ModernRoboticsI2cGyro gyro) {
+    public static TestableGyro generate(ModernRoboticsI2cGyro gyro) {
         return new TestableGyro() {
             @Override
             public Angle getHeading() {

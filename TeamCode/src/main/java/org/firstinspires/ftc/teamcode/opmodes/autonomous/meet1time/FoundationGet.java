@@ -15,14 +15,22 @@ public class FoundationGet extends LinearOpMode {
         bot.init(hardwareMap);
         waitForStart();
         bot.runtime.reset();
-        while (bot.runtime.seconds() < 1.5) {
-            telemetry.addData("Status", "Running");
+        double initGyro = bot.driveTrain.gyro();
+        while (bot.runtime.seconds() < 0.7) {
+            telemetry.addData("Status", "Aligning with foundation");
             telemetry.update();
-            bot.driveTrain.forceTranslate(-0.5,0);
+            bot.driveTrain.forceTranslate(-1,0, initGyro);
             if (!opModeIsActive()) {
                 return;
             }
         }
-        bot.driveTrain.spinDrive(0,0,0);
+        while (bot.runtime.seconds() < 0.7) {
+            telemetry.addData("Status", "Aligning with foundation");
+            telemetry.update();
+            bot.driveTrain.forceTranslate(-1,0, initGyro);
+            if (!opModeIsActive()) {
+                return;
+            }
+        }
     }
 }

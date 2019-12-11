@@ -7,8 +7,10 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 
 import org.westtorrancerobotics.lib.ftc.ButtonAndEncoderData;
+import org.westtorrancerobotics.lib.ftc.FtcTestableGyroFactory;
 import org.westtorrancerobotics.lib.ftc.MecanumDriveImpl;
-import org.westtorrancerobotics.lib.ftc.TestableGyro;
+import org.westtorrancerobotics.lib.hardware.sensors.TestableGyro;
+import org.westtorrancerobotics.lib.hardware.sensors.TestableGyroFactory;
 import org.westtorrancerobotics.lib.spline.geom.Angle;
 import org.westtorrancerobotics.lib.spline.geom.Location;
 import org.westtorrancerobotics.lib.hardware.drive.MecanumController;
@@ -61,6 +63,11 @@ public class DriveTrain {
         backupGyro1.initialize(params);
         params.calibrationDataFile = null;//gyro 2 config when made
         backupGyro2.initialize(params);
+
+        imus = TestableGyroFactory.generate(
+                FtcTestableGyroFactory.generate(backupGyro1),
+                FtcTestableGyroFactory.generate(backupGyro2)
+        );
 
         MecanumDrive wheels = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack);
         mecanumController = new MecanumController(wheels);
