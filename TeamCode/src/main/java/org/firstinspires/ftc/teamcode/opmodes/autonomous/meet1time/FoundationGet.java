@@ -4,6 +4,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
 import org.firstinspires.ftc.teamcode.Robot;
+import org.westtorrancerobotics.lib.spline.geom.Angle;
 
 @Autonomous(name = "get it boys", group = "none")
 public class FoundationGet extends LinearOpMode {
@@ -15,7 +16,7 @@ public class FoundationGet extends LinearOpMode {
         bot.init(hardwareMap);
         waitForStart();
         bot.runtime.reset();
-        double initGyro = bot.driveTrain.gyro();
+        Angle initGyro = bot.driveTrain.gyro();
         while (bot.runtime.seconds() < 0.7) {
             telemetry.addData("Status", "Aligning with foundation");
             telemetry.update();
@@ -26,7 +27,7 @@ public class FoundationGet extends LinearOpMode {
         }
         bot.runtime.reset();
         while (bot.runtime.seconds() < 1.5) {
-            telemetry.addData("Status", "Aligning with foundation");
+            telemetry.addData("Status", "Approaching foundation");
             telemetry.addData("Button", bot.foundationGrabber.frontTouchingFoundation());
             telemetry.update();
             bot.driveTrain.forceTranslate(0,-1, initGyro);

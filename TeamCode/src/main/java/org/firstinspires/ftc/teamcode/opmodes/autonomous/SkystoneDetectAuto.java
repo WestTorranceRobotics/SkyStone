@@ -13,7 +13,7 @@ public class SkystoneDetectAuto extends LinearOpMode {
     }
 
     private void strafe(double xPow, double yPow) {
-        double gyro = bot.driveTrain.gyro();
-        bot.driveTrain.spinDrive(xPow, yPow, Math.sqrt(Math.abs(gyro)) / 9 * Math.signum(gyro));
+//        double gyro = bot.driveTrain.gyro();
+//        bot.driveTrain.spinDrive(xPow, yPow, Math.sqrt(Math.abs(gyro)) / 9 * Math.signum(gyro));
     }
 }

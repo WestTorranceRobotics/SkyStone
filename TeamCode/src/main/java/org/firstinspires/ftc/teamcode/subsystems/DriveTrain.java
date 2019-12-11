@@ -98,8 +98,14 @@ public class DriveTrain {
         mecanumController.spinDrive(ang, speed, turn, MecanumDrive.TranslTurnMethod.EQUAL_SPEED_RATIOS);
     }
 
-    public void forceTranslate(double x, double y, double gyroTarget) {
-        spinDrive(x, y, Math.sqrt(Math.abs(gyro() - gyroTarget)) / 9 * Math.signum(gyro() - gyroTarget));
+    public void forceTranslate(double x, double y, Angle gyroTarget) {
+        spinDrive(x, y, Math.sqrt(Math.abs(
+                Angle.difference(gyro(), gyroTarget, Angle.AngleOrientation.COMPASS_HEADING)
+                        .getValue(Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)
+        ) / 9 * Math.signum(
+                Angle.difference(gyro(), gyroTarget, Angle.AngleOrientation.COMPASS_HEADING)
+                        .getValue(Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING)
+        )));
     }
 
     public void updateLocation() {
@@ -122,8 +128,8 @@ public class DriveTrain {
         return lineSpotter.blue() > BLUE_THRESHOLD;
     }
 
-    public double gyro() {
-        return imus.getHeading().getValue(Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);
+    public Angle gyro() {
+        return imus.getHeading();
     }
 
     private static class Odometer {
