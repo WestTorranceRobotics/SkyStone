@@ -185,11 +185,6 @@ public class NewTest extends LinearOpMode {
         right1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        left1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        left2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-
         if(direct == Direction.FORWARD) {
             left1.setTargetPosition((int) tick);
             left2.setTargetPosition((int) tick);
@@ -208,7 +203,12 @@ public class NewTest extends LinearOpMode {
         right1.setPower(L1);
         right2.setPower(L1);
 
-        while(left1.isBusy()){
+left1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        left2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        right1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        right2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        while(left1.isBusy() && right1.isBusy()){
             telemetry.addData("hi",1);
             telemetry.update();
         }
