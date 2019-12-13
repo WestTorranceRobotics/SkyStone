@@ -17,9 +17,6 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
 public class StoneManipulator {
     private static StoneManipulator instance = null;
     // limits maximum movement of extender
-    private TouchSensor extenderForwardLimit;
-    // limits minimum movement of extender
-    private TouchSensor extenderReverseLimit;
     //private CRServo outtakeRight;
     //private CRServo outtakeLeft;
     private boolean clasped;
@@ -43,8 +40,6 @@ public class StoneManipulator {
      *
      **/
     public void init(HardwareMap hardwareMap) {
-        extenderForwardLimit = hardwareMap.get(TouchSensor.class, "extenderForwardLimit");
-        extenderReverseLimit = hardwareMap.get(TouchSensor.class, "extenderReverseLimit");
         rightIntake = hardwareMap.get(DcMotor.class, "intakeRight/odometerRightY");
         leftIntake = hardwareMap.get(DcMotor.class, "intakeLeft/odometerLeftY");
         nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
