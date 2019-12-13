@@ -112,40 +112,11 @@ public class NewTest extends LinearOpMode {
 
         while (opModeIsActive()) {
 
-            if (runtime.seconds() == 5) {
-                telemetry.addData("hi", 1);
-                telemetry.update();
-            }
+            straightMovement(20,0.5,Direction.BACKWARD);
 
-            driveDistance(20, Direction.BACKWARD,1000);// Maybe a little more
+            straightMovement(10,0.8,Direction.FORWARD);
 
-            driveDistance(0, Direction.FORWARD,2000);
-
-            double left = bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT);
-            double right = bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT);
-            sleep(1000);
-            while (true) {
-                if (seeing(left, right) == true) {
-                    break;
-                } else {
-                    driveDistance(5, Direction.RIGHT, 1000);
-                    driveDistance(0, Direction.FORWARD, 1000);
-                }
-            }
-
-            driveDistance(15, Direction.FORWARD,1000); //Maybe a little more
-
-            driveDistance(0, Direction.FORWARD,2000);
-
-            driveDistance(60, Direction.LEFT,5000);
-
-            driveDistance(0,Direction.FORWARD, 2000);
-
-            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
-
-            while (bot.driveTrain.onBlueLine() != true) {
-                driveDistance(5, Direction.RIGHT, 1000);
-            }
+            break;
 
         }
 
@@ -180,9 +151,9 @@ public class NewTest extends LinearOpMode {
 
 
     //int ENCODER_TICKS_PER_REVOLUTION = 1440; Of DCMOTOR. NOT MECANUM WHEEL!
-    int NUM_OF_TICKS = 4096;
+    int NUM_OF_TICKS = 560;
     double PI = 3.14159265358979323;
-    int WHEEL_DIAMETER = 2;
+    int WHEEL_DIAMETER = 4;
     double conversion = NUM_OF_TICKS / (WHEEL_DIAMETER * PI);
 
     double TIMEX = 1000;
@@ -204,34 +175,49 @@ public class NewTest extends LinearOpMode {
     double POWEROVERDISTANCEY = power / DistanceY; //SIDE TO SIDE MOVEMENT in
 
 
-    void straightMovement(int inches, double L1, double L2, double R1, double R2) {
-
-        int currentPosLeft = intakeLeft.getCurrentPosition();
-        // insert name of left odometry wheel
-        int currentPosRight = intakeRight.getCurrentPosition();
+    void straightMovement(int inches, double L1, Direction direct) {
 
         // insert name of the right odometry wheel
+        double tick = conversion * inches;
 
-        double ticksMovement = conversion * inches;
-
-        double targetPosLeft = currentPosLeft + ticksMovement;
-        double targetPosRight = currentPosRight + ticksMovement;
-
-        left1.setTargetPosition((int) targetPosLeft);
-        left2.setTargetPosition((int) targetPosLeft);
-        right1.setTargetPosition((int) targetPosRight);
-        right2.setTargetPosition((int) targetPosRight);
+        left1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         left1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         left2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         right1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         right2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
-        left1.setPower(L1);
-        left2.setPower(L2);
-        right1.setPower(R1);
-        right2.setPower(R2);
+        if(direct == Direction.FORWARD) {
+            left1.setTargetPosition((int) tick);
+            left2.setTargetPosition((int) tick);
+            right1.setTargetPosition((int) tick);
+            right2.setTargetPosition((int) tick);
+        }
+        if(direct == Direction.BACKWARD) {
+            left1.setTargetPosition((int) -tick);
+            left2.setTargetPosition((int) -tick);
+            right1.setTargetPosition((int) -tick);
+            right2.setTargetPosition((int) -tick);
+        }
 
+        left1.setPower(L1);
+        left2.setPower(L1);
+        right1.setPower(L1);
+        right2.setPower(L1);
+
+        while(left1.isBusy()){
+            telemetry.addData("hi",1);
+            telemetry.update();
+        }
+
+        left1.setPower(0);
+        left2.setPower(0);
+        right1.setPower(0);
+        right2.setPower(0);
+        sleep(1000);
 
     }
 
