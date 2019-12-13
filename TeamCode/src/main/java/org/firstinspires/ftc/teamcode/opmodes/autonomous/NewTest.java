@@ -114,9 +114,27 @@ public class NewTest extends LinearOpMode {
 
             straightMovement(20,0.5,Direction.BACKWARD);
 
-            straightMovement(10,0.8,Direction.FORWARD);
+            if(seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT),FoundationGrabber.Hook.LEFT)){
+                sideToSide(2,0.6,Direction.LEFT);
+                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT,true);
+            }
+            else if(seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT),FoundationGrabber.Hook.RIGHT)){
+                sideToSide(2,0.6,Direction.RIGHT);
+                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,true);
 
-            break;
+            }
+            else{
+                sideToSide(10,0.6,Direction.LEFT);
+                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT,true);
+            }
+
+            straightMovement(10,0.5,Direction.FORWARD);
+
+            sideToSide(60,0.8,Direction.LEFT);
+
+            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
+
+            sideToSide(30,0.5,Direction.RIGHT);
 
         }
 
@@ -175,15 +193,12 @@ public class NewTest extends LinearOpMode {
     double POWEROVERDISTANCEY = power / DistanceY; //SIDE TO SIDE MOVEMENT in
 
 
-    void straightMovement(int inches, double L1, Direction direct) {
+    void straightMovement(int inches, double POWER, Direction direct) {
 
         // insert name of the right odometry wheel
         double tick = conversion * inches;
 
-        left1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        allmotorsSet(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
         if(direct == Direction.FORWARD) {
             left1.setTargetPosition((int) tick);
@@ -198,65 +213,80 @@ public class NewTest extends LinearOpMode {
             right2.setTargetPosition((int) -tick);
         }
 
-        left1.setPower(L1);
-        left2.setPower(L1);
-        right1.setPower(L1);
-        right2.setPower(L1);
+        allmotorsSet(DcMotor.RunMode.RUN_TO_POSITION);
 
-left1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        left2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        right2.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        powerAll(POWER);
 
-        while(left1.isBusy() && right1.isBusy()){
-            telemetry.addData("hi",1);
+        while(left1.isBusy() && right1.isBusy() && left2.isBusy() && right2.isBusy()){
+            telemetry.addData("left1 Position", left1.getCurrentPosition());
+            telemetry.addData("left2 Position", left2.getCurrentPosition());
+            telemetry.addData("right1 Position", right1.getCurrentPosition());
+            telemetry.addData("right2 Position", right2.getCurrentPosition());
             telemetry.update();
         }
 
-        left1.setPower(0);
-        left2.setPower(0);
-        right1.setPower(0);
-        right2.setPower(0);
-        sleep(1000);
+        powerAll(0);
+        sleep(2000);
 
     }
 
 
-    void sideToSide(int inches, double L1, double L2, double R1, double R2) {
-
-        int currentPosLeft = intakeLeft.getCurrentPosition();
-        // insert name of left odometry wheel
-        int currentPosRight = intakeRight.getCurrentPosition();
-        // insert name of the right odometry wheel
-        int currentAlignment = liftRight.getCurrentPosition();
+    void sideToSide(int inches, double POWER,Direction direct) {
 
         double ticksMovement = conversion * inches;
 
-        double targetAlignPos = currentAlignment + ticksMovement;
+        allmotorsSet(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if (currentAlignment != targetAlignPos) {
-            left1.setPower(L1);
-            left2.setPower(L2);
-            right1.setPower(R1);
-            right2.setPower(R2);
-        } else {
-            left1.setPower(0);
-            left2.setPower(0);
-            right1.setPower(0);
-            right2.setPower(0);
+        if (direct == Direction.LEFT) {
+            left1.setTargetPosition((int) -ticksMovement);
+            left2.setTargetPosition((int) ticksMovement);
+            right1.setTargetPosition((int) -ticksMovement);
+            right2.setTargetPosition((int) ticksMovement);
         }
+        else if(direct == Direction.RIGHT){
+            left1.setTargetPosition((int) ticksMovement);
+            left2.setTargetPosition((int) -ticksMovement);
+            right1.setTargetPosition((int) -ticksMovement);
+            right2.setTargetPosition((int) ticksMovement);
+        }
+
+        allmotorsSet(DcMotor.RunMode.RUN_TO_POSITION);
+
+        powerAll(POWER);
+
+        while(left1.isBusy() && right1.isBusy() && left2.isBusy() && right2.isBusy()){
+            telemetry.addData("left1 Position", left1.getCurrentPosition());
+            telemetry.addData("left2 Position", left2.getCurrentPosition());
+            telemetry.addData("right1 Position", right1.getCurrentPosition());
+            telemetry.addData("right2 Position", right2.getCurrentPosition());
+            telemetry.update();
+        }
+
+        powerAll(0);
+        sleep(2000);
+
     }
-    boolean seeing (double left, double right) {
-        if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.RIGHT, right)) {
-            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+    boolean seeing (double distanceAway, FoundationGrabber.Hook side) {
+        if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(side, distanceAway)) {
             return true;
         }
-        if (FoundationGrabber.SeenObject.SKYSTONE == bot.foundationGrabber.getView(FoundationGrabber.Hook.LEFT, left)) {
-            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
-            return true;
-        } else {
+        else {
             return false;
         }
+    }
+
+    void powerAll(double power){
+        left1.setPower(power);
+        left2.setPower(power);
+        right1.setPower(power);
+        right2.setPower(power);
+    }
+
+    void allmotorsSet(DcMotor.RunMode MODE){
+        left1.setMode(MODE);
+        left2.setMode(MODE);
+        right1.setMode(MODE);
+        right2.setMode(MODE);
     }
 
     public void driveDistance(double distance, Direction direction, int time) {
