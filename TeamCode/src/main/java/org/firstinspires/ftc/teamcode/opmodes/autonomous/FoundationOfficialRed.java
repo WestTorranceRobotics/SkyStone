@@ -13,8 +13,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
 
-@Autonomous(name = "FoundationAuto", group = "none")
-public class FoundationOfficial extends LinearOpMode {
+@Autonomous(name = "FoundationOfficialRed", group = "none")
+public class FoundationOfficialRed extends LinearOpMode {
 
     private Robot bot;
     private BNO055IMU backupGyro1;
