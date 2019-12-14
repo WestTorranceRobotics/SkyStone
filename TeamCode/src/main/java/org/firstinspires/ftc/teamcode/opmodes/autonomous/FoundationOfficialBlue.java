@@ -5,7 +5,6 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
-import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -14,7 +13,7 @@ import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
 
 @Autonomous(name = "FoundationOfficialRed", group = "none")
-public class FoundationOfficialRed extends LinearOpMode {
+public class FoundationOfficialBlue extends LinearOpMode {
 
     private Robot bot;
     private BNO055IMU backupGyro1;
@@ -75,13 +74,13 @@ public class FoundationOfficialRed extends LinearOpMode {
         getData();
         resetEncoders();
         // MOVES TO ALIGN WITH FOUNDATION
-        while (distanceEV < STEP_ONE && opModeIsActive()) {
+        while (distanceEV > -STEP_ONE && opModeIsActive()) {
             getData();
             forceAngle();
-            leftBack.setPower(.5);
-            leftFront.setPower(-.5);
-            rightBack.setPower(-.5);
-            rightFront.setPower(.5);
+            leftBack.setPower(-.5);
+            leftFront.setPower(.5);
+            rightBack.setPower(.5);
+            rightFront.setPower(-.5);
             getTelem();
         }
         bot.driveTrain.spinDrive(0, 0, 0);
@@ -116,13 +115,13 @@ public class FoundationOfficialRed extends LinearOpMode {
         // UNGRAB
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, false);
         // MOVE TO PARK
-        while (distanceEV > STEP_FOUR && opModeIsActive()) {
+        while (distanceEV > -STEP_FOUR && opModeIsActive()) {
             getData();
             forceAngle();
-            leftBack.setPower(-.5);
-            leftFront.setPower(.5);
-            rightBack.setPower(.5);
-            rightFront.setPower(-.5);
+            leftBack.setPower(.5);
+            leftFront.setPower(-.5);
+            rightBack.setPower(-.5);
+            rightFront.setPower(.5);
             getTelem();
         }
         bot.driveTrain.spinDrive(0, 0, 0);
