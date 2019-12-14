@@ -98,14 +98,6 @@ public class HardwareTester extends LinearOpMode {
                         telemetry.update();
                         sleep(1);
                     }
-                } else if (device instanceof TouchSensor) {
-                    TouchSensor touch = (TouchSensor) device;
-                    double start = getRuntime();
-                    while (getRuntime() < start + 2) {
-                        telemetry.addData("Is Pressed?", touch.isPressed());
-                        telemetry.update();
-                        sleep(1);
-                    }
                 }
                 else {
                     telemetry.addLine("No tests performed, unregistered device type.");

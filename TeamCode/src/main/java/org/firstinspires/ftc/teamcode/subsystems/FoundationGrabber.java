@@ -15,13 +15,10 @@ import java.util.function.DoublePredicate;
 public class FoundationGrabber {
 
     private Servo leftHook;
-    private RevTouchSensor leftBlock;
     private RevColorSensorV3 leftEye;
     private Servo rightHook;
-    private RevTouchSensor rightBlock;
     private RevColorSensorV3 rightEye;
-    private RevTouchSensor frontTouch;
-    private RevTouchSensor sideTouch;
+
 
     private final double LEFT_GRABBED_POSITION = 0.31;
     private final double LEFT_UNGRABBED_POSITION = 0.847;
@@ -42,7 +39,7 @@ public class FoundationGrabber {
 
     public void init(HardwareMap hardwareMap) {
         leftHook = hardwareMap.get(Servo.class, "foundationHookLeft");
-        leftBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchLeft");
+
 
         double aParam = 519.837;
         double bInvParam = 0.467;
@@ -61,7 +58,7 @@ public class FoundationGrabber {
         };
 
         rightHook = hardwareMap.get(Servo.class, "foundationHookRight");
-        rightBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchRight");
+
 
         rightEye = new RevColorSensorV3(
                 hardwareMap.get(RevColorSensorV3.class, "ssColorRight").getDeviceClient()
@@ -75,8 +72,7 @@ public class FoundationGrabber {
             }
         };
 
-        frontTouch = hardwareMap.get(RevTouchSensor.class, "foundationTouchFront");
-        sideTouch = hardwareMap.get(RevTouchSensor.class, "foundationTouchSide");
+
     }
 
     public void setGrabbed(Hook hook, boolean grabbed) {
@@ -96,22 +92,8 @@ public class FoundationGrabber {
         }
     }
 
-    public boolean isGrabbedOnButton(Hook hook) {
-        switch (hook) {
-            case LEFT:
-                return ButtonAndEncoderData.getLatest().isPressed(leftBlock);
-            case RIGHT:
-                return ButtonAndEncoderData.getLatest().isPressed(rightBlock);
-            case BOTH:
-                return ButtonAndEncoderData.getLatest().isPressed(leftBlock)
-                        && ButtonAndEncoderData.getLatest().isPressed(rightBlock);
-            case EITHER:
-                return ButtonAndEncoderData.getLatest().isPressed(leftBlock)
-                        || ButtonAndEncoderData.getLatest().isPressed(rightBlock);
-            default:
-                throw new IllegalArgumentException("Unknown or invalid hook " + hook + " provided.");
-        }
-    }
+
+
 
     public SeenObject getView(Hook hook, double distance) {
         if (distance > MAX_STONE_VISIBLE_DISTANCE_IN) {
@@ -157,13 +139,7 @@ public class FoundationGrabber {
         }
     }
 
-    public boolean frontTouchingFoundation() {
-        return frontTouch.isPressed();
-    }
 
-    public boolean sideTouchingFoundation() {
-        return sideTouch.isPressed();
-    }
 
     public enum Hook {
         LEFT,

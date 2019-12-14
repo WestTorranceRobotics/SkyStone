@@ -46,11 +46,7 @@ public class SkystoneDetectAuto extends LinearOpMode {
                 : right == STONE ? bot.foundationGrabber.getDistance(RIGHT)
                 : (bot.foundationGrabber.getDistance(LEFT) + bot.foundationGrabber.getDistance(RIGHT) / 2);
         sleep(1000);
-        while(opModeIsActive() && !bot.foundationGrabber.sideTouchingFoundation()) {
-            telemetry.addData("dst", dst.getAsDouble());
-            telemetry.update();
-            bot.driveTrain.holdDirTranslate(0, -dst.getAsDouble() / 8, dir);
-        }
+
         telemetry.addData("left obj", left);
         telemetry.addData("right obj", right);
         String target = "not found";
