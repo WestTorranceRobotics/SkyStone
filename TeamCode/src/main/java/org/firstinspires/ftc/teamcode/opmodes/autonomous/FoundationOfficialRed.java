@@ -52,7 +52,7 @@ public class FoundationOfficialRed extends LinearOpMode {
         resetEncoders();
         getData();
         resetEncoders();
-        while (distanceEV < 12 && opModeIsActive()) {
+        while (distanceEV < 16 && opModeIsActive()) {
             getData();
             forceAngle();
             leftBack.setPower(.5);
@@ -63,7 +63,7 @@ public class FoundationOfficialRed extends LinearOpMode {
         }
         bot.driveTrain.spinDrive(0, 0, 0);
         resetEncoders();
-        while (distanceEV > -29 && opModeIsActive()) {
+        while (distanceEV > -24 && opModeIsActive()) {
             getData();
             forceAngle();
             leftBack.setPower(-.5);
@@ -79,16 +79,16 @@ public class FoundationOfficialRed extends LinearOpMode {
         while (distanceEV < 32 && opModeIsActive()) {
             getData();
             forceAngle();
-            leftBack.setPower(.5);
-            leftFront.setPower(.5);
-            rightBack.setPower(.5);
-            rightFront.setPower(.5);
+            leftBack.setPower(.75);
+            leftFront.setPower(.75);
+            rightBack.setPower(.75);
+            rightFront.setPower(.75);
             getTelem();
         }
         bot.driveTrain.spinDrive(0, 0, 0);
         resetEncoders();
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, false);
-        while (distanceEV > -35 && opModeIsActive()) {
+        while (distanceEV > -55 && opModeIsActive()) {
             getData();
             forceAngle();
             leftBack.setPower(-.5);
