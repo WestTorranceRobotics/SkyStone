@@ -12,7 +12,7 @@ import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
 
-@Autonomous(name = "FoundationOfficialRed", group = "none")
+@Autonomous(name = "FoundationOfficialBlue", group = "none")
 public class FoundationOfficialBlue extends LinearOpMode {
 
     private Robot bot;
@@ -75,6 +75,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
         resetEncoders();
         // MOVES TO ALIGN WITH FOUNDATION
         while (distanceEV > -STEP_ONE && opModeIsActive()) {
+            if (!opModeIsActive()) {return;}
             getData();
             forceAngle();
             leftBack.setPower(-.5);
@@ -87,6 +88,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
         resetEncoders();
         // MOVE TO GET CLOSE TO FOUNDATION
         while (distanceEV > STEP_TWO && opModeIsActive()) {
+            if (!opModeIsActive()) {return;}
             getData();
             forceAngle();
             leftBack.setPower(-.5);
@@ -102,6 +104,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
         sleep(3000);
         // MOVE TO PULL FOUNDATION BACK
         while (distanceEV < STEP_THREE && opModeIsActive()) {
+            if (!opModeIsActive()) {return;}
             getData();
             forceAngle();
             leftBack.setPower(.75);
@@ -116,6 +119,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, false);
         // MOVE TO PARK
         while (distanceEV > -STEP_FOUR && opModeIsActive()) {
+            if (!opModeIsActive()) {return;}
             getData();
             forceAngle();
             leftBack.setPower(.5);
@@ -135,6 +139,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
      * Call to reset Encoders
      */
     private void resetEncoders() {
+        if (!opModeIsActive()) {return;}
         leftBack.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         leftBack.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
     }
@@ -143,6 +148,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
      * Call to update distance
      */
     private void getData() {
+        if (!opModeIsActive()) {return;}
         currentAngle = backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
         distanceEV = leftBack.getCurrentPosition() * ((4 * Math.PI) / 560);
     }
@@ -151,6 +157,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
      * getData must be called for data to update
      */
     private void getTelem() {
+        if (!opModeIsActive()) {return;}
         telemetry.addData("distanceEV", distanceEV);
         telemetry.addData("DEGREES", currentAngle);
         telemetry.update();
@@ -163,6 +170,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
      */
     private void forceAngle () {
         while ((currentAngle > 5 || currentAngle < -5) && opModeIsActive()) {
+            if (!opModeIsActive()) {return;}
             currentAngle = backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
             if (currentAngle > 5 && opModeIsActive()) {
                 leftFront.setPower(.25);
