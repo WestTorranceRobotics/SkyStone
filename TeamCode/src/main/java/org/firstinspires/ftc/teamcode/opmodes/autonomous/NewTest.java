@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode.opmodes.autonomous;
 
+import com.qualcomm.hardware.bosch.BNO055IMU;
 import com.qualcomm.hardware.rev.RevColorSensorV3;
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
@@ -7,6 +8,9 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
+import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Robot;
 import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
 import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
@@ -31,6 +35,10 @@ public class NewTest extends LinearOpMode {
     // defining back left wheel
     private DcMotor right2;
     private RevColorSensorV3 leftEye;
+
+    private BNO055IMU backupGyro1;
+
+    private double currentAngle;
     // color sensor
 
 
@@ -95,48 +103,48 @@ public class NewTest extends LinearOpMode {
 
         left1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         left1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+        //left1.setMode(DcMotor.RunMode.RUN_TO_POSITION);
 
         left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        left2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
+        right1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        right2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-//.        waitForStart();
+        waitForStart();
 
         telemetry.addData("hi",1);
         telemetry.update();
 
         runtime.reset();
 
-        while (opModeIsActive()) {
+        straightMovement(-12,-0.6);
 
-            straightMovement(20,0.5,Direction.BACKWARD);
 
-            if(seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT),FoundationGrabber.Hook.LEFT)){
-                sideToSide(2,0.6,Direction.LEFT);
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT,true);
-            }
-            else if(seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT),FoundationGrabber.Hook.RIGHT)){
-                sideToSide(2,0.6,Direction.RIGHT);
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,true);
 
-            }
-            else{
-                sideToSide(10,0.6,Direction.LEFT);
-                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT,true);
-            }
+//            if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT), FoundationGrabber.Hook.LEFT)) {
+//                    sideToSide(-5, 0.6);
+//                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
+//            } else if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT), FoundationGrabber.Hook.RIGHT)) {
+//                    sideToSide(5, 0.6);
+//                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+//
+//            } else {
+//                    sideToSide(-6, 0.6);
+//                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
+//            }
 
-            straightMovement(10,0.5,Direction.FORWARD);
 
-            sideToSide(60,0.8,Direction.LEFT);
+            straightMovement(8,0.5);
+
+            sideToSide(-60,0.8);
 
             bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
-            sideToSide(30,0.5,Direction.RIGHT);
-
-        }
+            sideToSide(30,0.5);
 
 
         //driveDistance(30,0,Direction.FORWARD);
@@ -193,36 +201,28 @@ public class NewTest extends LinearOpMode {
     double POWEROVERDISTANCEY = power / DistanceY; //SIDE TO SIDE MOVEMENT in
 
 
-    void straightMovement(int inches, double POWER, Direction direct) {
+    void straightMovement(int inches, double POWER) {
 
         // insert name of the right odometry wheel
         double tick = conversion * inches;
 
-        allmotorsSet(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if(direct == Direction.FORWARD) {
-            left1.setTargetPosition((int) tick);
-            left2.setTargetPosition((int) tick);
-            right1.setTargetPosition((int) tick);
-            right2.setTargetPosition((int) tick);
+        left2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        if(tick < 0) {
+            while (left2.getCurrentPosition() > (int) tick) {
+                telemetry.addData("left", left2.getCurrentPosition());
+                telemetry.update();
+                powerAll(POWER);
+            }
         }
-        if(direct == Direction.BACKWARD) {
-            left1.setTargetPosition((int) -tick);
-            left2.setTargetPosition((int) -tick);
-            right1.setTargetPosition((int) -tick);
-            right2.setTargetPosition((int) -tick);
-        }
-
-        allmotorsSet(DcMotor.RunMode.RUN_TO_POSITION);
-
-        powerAll(POWER);
-
-        while(left1.isBusy() && right1.isBusy() && left2.isBusy() && right2.isBusy()){
-            telemetry.addData("left1 Position", left1.getCurrentPosition());
-            telemetry.addData("left2 Position", left2.getCurrentPosition());
-            telemetry.addData("right1 Position", right1.getCurrentPosition());
-            telemetry.addData("right2 Position", right2.getCurrentPosition());
-            telemetry.update();
+        else{
+            while (left2.getCurrentPosition() < (int) tick) {
+                telemetry.addData("left", left2.getCurrentPosition());
+                telemetry.update();
+                powerAll(POWER);
+            }
         }
 
         powerAll(0);
@@ -231,35 +231,28 @@ public class NewTest extends LinearOpMode {
     }
 
 
-    void sideToSide(int inches, double POWER,Direction direct) {
+    void sideToSide(int inches, double POWER) {
 
         double ticksMovement = conversion * inches;
 
-        allmotorsSet(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
-        if (direct == Direction.LEFT) {
-            left1.setTargetPosition((int) -ticksMovement);
-            left2.setTargetPosition((int) ticksMovement);
-            right1.setTargetPosition((int) -ticksMovement);
-            right2.setTargetPosition((int) ticksMovement);
-        }
-        else if(direct == Direction.RIGHT){
-            left1.setTargetPosition((int) ticksMovement);
-            left2.setTargetPosition((int) -ticksMovement);
-            right1.setTargetPosition((int) -ticksMovement);
-            right2.setTargetPosition((int) ticksMovement);
-        }
+        left2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        allmotorsSet(DcMotor.RunMode.RUN_TO_POSITION);
-
-        powerAll(POWER);
-
-        while(left1.isBusy() && right1.isBusy() && left2.isBusy() && right2.isBusy()){
-            telemetry.addData("left1 Position", left1.getCurrentPosition());
-            telemetry.addData("left2 Position", left2.getCurrentPosition());
-            telemetry.addData("right1 Position", right1.getCurrentPosition());
-            telemetry.addData("right2 Position", right2.getCurrentPosition());
-            telemetry.update();
+        if(ticksMovement > 0){
+            while (ticksMovement > left2.getCurrentPosition()) {
+                left1.setPower(-POWER);
+                left2.setPower(POWER);
+                right1.setPower(POWER);
+                right2.setPower(-POWER);
+            }
+        }else {
+            while (ticksMovement < left2.getCurrentPosition()) {
+                left1.setPower(POWER);
+                left2.setPower(-POWER);
+                right1.setPower(-POWER);
+                right2.setPower(POWER);
+            }
         }
 
         powerAll(0);
@@ -383,6 +376,31 @@ public class NewTest extends LinearOpMode {
         }
 
 
+    }
+
+    private void forceAngle () {
+        while ((currentAngle > 5 || currentAngle < -5) && opModeIsActive()) {
+            if (!opModeIsActive()) {return;}
+            currentAngle = backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
+            if (currentAngle > 5 && opModeIsActive()) {
+                left1.setPower(.25);
+                left2.setPower(.25);
+                right1.setPower(-.25);
+                right2.setPower(-.25);
+            } else if
+            (currentAngle < -5 && opModeIsActive()) {
+                left1.setPower(-.25);
+                left2.setPower(-.25);
+                right1.setPower(.25);
+                right2.setPower(.25);
+            } else {
+                left1.setPower(0);
+                left2.setPower(0);
+                right1.setPower(0);
+                right2.setPower(0);
+
+            }
+        }
     }
 
 

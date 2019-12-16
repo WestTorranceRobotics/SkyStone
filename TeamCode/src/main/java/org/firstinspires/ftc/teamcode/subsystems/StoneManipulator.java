@@ -42,8 +42,8 @@ public class StoneManipulator {
     public void init(HardwareMap hardwareMap) {
         rightIntake = hardwareMap.get(DcMotor.class, "intakeRight/odometerRightY");
         leftIntake = hardwareMap.get(DcMotor.class, "intakeLeft/odometerLeftY");
-        nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
-        nubLittle = hardwareMap.get (Servo.class, "nubGrabLittle");
+        //nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
+        //nubLittle = hardwareMap.get (Servo.class, "nubGrabLittle");
 
         leftIntake.setDirection(DcMotor.Direction.REVERSE);
     }

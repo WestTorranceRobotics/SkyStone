@@ -40,7 +40,6 @@ public class FoundationGrabber {
 
     public void init(HardwareMap hardwareMap) {
         leftHook = hardwareMap.get(Servo.class, "foundationHookLeft");
-        leftBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchLeft");
 
         double aParam = 315;
         double bInvParam = 0.605;
@@ -55,7 +54,6 @@ public class FoundationGrabber {
         };
 
         rightHook = hardwareMap.get(Servo.class, "foundationHookRight");
-        rightBlock = hardwareMap.get(RevTouchSensor.class, "autoBlockTouchRight");
 
 
         rightEye = new RevColorSensorV3(
