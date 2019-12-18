@@ -29,6 +29,7 @@ public class MecanumTeleop extends LinearOpMode {
     private DcMotor left2;
     private DcMotor right1;
     private DcMotor right2;
+    private double test_var = 0;
 
     private boolean isGrabbed;
 
@@ -37,11 +38,13 @@ public class MecanumTeleop extends LinearOpMode {
     private CRServo outtakeLeft;
     private CRServo outtakeRight;
 
-    private Servo nubBig;
-    private Servo nubLittle;
+
 
     private Servo grabRight;
     private Servo grabLeft;
+    private CRServo leftOuttakeArm;
+    private CRServo rightOuttakeArm;
+    private Servo outtakeArmGrab;
 
     private DcMotorEx leftMotor;
     private DcMotorEx rightMotor;
@@ -52,6 +55,11 @@ public class MecanumTeleop extends LinearOpMode {
         telemetry.update();
 
         backupGyro1 = hardwareMap.get(BNO055IMU.class, "imu1");
+        leftOuttakeArm = hardwareMap.crservo.get("leftOuttakeArm");
+        rightOuttakeArm = hardwareMap.crservo.get("rightOuttakeArm");
+        outtakeArmGrab = hardwareMap.servo.get("outtakeArmGrab");
+        leftOuttakeArm.setDirection(DcMotorSimple.Direction.FORWARD);
+        rightOuttakeArm.setDirection(DcMotorSimple.Direction.REVERSE);
 
         left1 = hardwareMap.dcMotor.get("leftFront");
         left2 = hardwareMap.dcMotor.get("leftBack");
@@ -67,20 +75,29 @@ public class MecanumTeleop extends LinearOpMode {
         leftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         leftMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
-        intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
+
 
         grabLeft = hardwareMap.servo.get("foundationHookLeft");
         grabRight = hardwareMap.servo.get("foundationHookRight");
+        intakeLeft = hardwareMap.dcMotor.get("intakeLeft/odometerLeftY");
+        intakeRight = hardwareMap.dcMotor.get("intakeRight/odometerRightY");
 
-        nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
-        nubLittle = hardwareMap.get (Servo.class, "nubGrabLittle");
-
-        outtakeLeft = hardwareMap.crservo.get("outtakeLeft");
-        outtakeRight = hardwareMap.crservo.get("outtakeRight");
+//        outtakeLeft = hardwareMap.crservo.get("outtakeLeft");
+//        outtakeRight = hardwareMap.crservo.get("outtakeRight");
 
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
+        left1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        left2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        right1.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
+
+        right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        right2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         right2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         right2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
@@ -92,8 +109,7 @@ public class MecanumTeleop extends LinearOpMode {
         intakeLeft.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         intakeLeft.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
-        outtakeLeft.setDirection(DcMotorSimple.Direction.FORWARD);
-        outtakeRight.setDirection(DcMotorSimple.Direction.REVERSE);
+
 
         telemetry.addData("right", grabRight.getPosition());
         telemetry.addData("left", grabRight.getPosition());
@@ -124,22 +140,46 @@ public class MecanumTeleop extends LinearOpMode {
             right1.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             right2.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-            int intakeSpeed = 0;
-            double outtakeSpeed = 0;
+
+//            if (gamepad2.a) {outtakeArmGrab.setPosition(1);
+//            isGrabbed = true;}
+//            else if (gamepad2.b) {outtakeArmGrab.setPosition(0);
+//            isGrabbed = false;}
 
             if (gamepad2.right_bumper) {
-                intakeSpeed = 1;
+                intakeLeft.setPower(.5);
+                intakeRight.setPower(.5);;
+            } else if (gamepad2.left_bumper) {
+                intakeLeft.setPower(-1);
+                intakeRight.setPower(-1);}
+            else {
+                intakeLeft.setPower(0);
+                intakeRight.setPower(0);
             }
-            if (gamepad2.dpad_up) {leftMotor.setPower(.75); rightMotor.setPower(.75);} else if (gamepad2.dpad_down) {leftMotor.setPower(-.05); rightMotor.setPower(-.05);} else if (!isGrabbed) {leftMotor.setPower(0); rightMotor.setPower(0);} else {leftMotor.setPower(.33); rightMotor.setPower(.33);}
+//            if (gamepad2.right_trigger > .2) {
+//                leftOuttakeArm.setPower(.5);
+//                rightOuttakeArm.setPower(.5);
+//            } else if (gamepad2.left_trigger > .2) {
+//                leftOuttakeArm.setPower(-.5);
+//                rightOuttakeArm.setPower(-.5);
+//            } else {
+//                leftOuttakeArm.setPower(0);
+//                rightOuttakeArm.setPower(0);
+//            }
 
-            if (gamepad2.dpad_right) {
-                outtakeSpeed = -.75;
+            if (gamepad2.dpad_up && isGrabbed == true) {
+                leftMotor.setPower(.75); rightMotor.setPower(.75);
             }
-            else if (gamepad2.dpad_left) { outtakeSpeed = .75;} else { outtakeSpeed = 0;}
-            intakeLeft.setPower(intakeSpeed);
-            intakeRight.setPower(intakeSpeed);
-            outtakeRight.setPower(outtakeSpeed);
-            outtakeLeft.setPower(outtakeSpeed);
+            else if (gamepad2.dpad_down && isGrabbed == true) {
+                leftMotor.setPower(-.05); rightMotor.setPower(-.05);
+            }
+            else if (isGrabbed == false) {
+                leftMotor.setPower(0); rightMotor.setPower(0);
+            }
+            else {
+                leftMotor.setPower(.40); rightMotor.setPower(.40);
+            }
+
 
             if (!prevPos && gamepad2.x) {
                 if (!pos) {
@@ -155,10 +195,11 @@ public class MecanumTeleop extends LinearOpMode {
             } else if (!gamepad2.x) {
                 prevPos = false;
             }
+
             telemetry.addData("gyro: ",backupGyro1.getAngularOrientation());
             telemetry.update();
         }
-        if (gamepad2.a) {nubBig.setPosition(.9); nubLittle.setPosition(.9); isGrabbed = true;} else if (gamepad2.b) {nubBig.setPosition(.4); nubLittle.setPosition(.4); isGrabbed = false;}
+
     }
 
     void setLeft2Power(double n){

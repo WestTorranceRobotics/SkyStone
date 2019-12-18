@@ -67,10 +67,6 @@ public class DriveTrain {
 
         TestableGyro imu1 = FtcTestableGyroFactory.generate(backupGyro1);
         TestableGyro imu2 = FtcTestableGyroFactory.generate(backupGyro2);
-        imu1.isWorking();
-        imu1.getHeading();
-        imu2.isWorking();
-        imu2.getHeading();
         imus = new TestableGyro() {
             @Override
             public Angle getHeading() {
@@ -82,8 +78,6 @@ public class DriveTrain {
                 return imu1.isWorking() || imu2.isWorking();
             }
         };
-
-        gyro();
 
         MecanumDrive wheels = new MecanumDriveImpl(leftFront, leftBack, rightFront, rightBack, null);
         mecanumController = new MecanumController(wheels);
@@ -141,7 +135,6 @@ public class DriveTrain {
     public void holdDirTranslate(double x, double y, Angle targetDir) {
         double gyro = Angle.difference(targetDir, gyro(), Angle.AngleOrientation.COMPASS_HEADING)
                 .getValue(Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);
-        gyro = 0;
         spinDrive(x, y, Math.sqrt(Math.abs(gyro)) / 9 * Math.signum(gyro));
     }
 

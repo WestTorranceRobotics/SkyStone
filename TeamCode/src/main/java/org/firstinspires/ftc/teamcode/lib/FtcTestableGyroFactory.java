@@ -16,7 +16,7 @@ public class FtcTestableGyroFactory {
         return new TestableGyro() {
             @Override
             public Angle getHeading() {
-                return new Angle(gyro.getAngularOrientation(AxesReference.EXTRINSIC, AxesOrder.ZYX,
+                return new Angle(gyro.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX,
                         AngleUnit.DEGREES).firstAngle, Angle.AngleUnit.DEGREES, Angle.AngleOrientation.COMPASS_HEADING);
             }
 

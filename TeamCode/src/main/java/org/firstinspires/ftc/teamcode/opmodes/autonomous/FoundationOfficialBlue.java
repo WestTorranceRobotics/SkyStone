@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
@@ -118,7 +119,7 @@ public class FoundationOfficialBlue extends LinearOpMode {
         // UNGRAB
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH, false);
         // MOVE TO PARK
-        while (distanceEV > -STEP_FOUR && opModeIsActive()) {
+        while (distanceEV < -STEP_FOUR && opModeIsActive()) {
             if (!opModeIsActive()) {return;}
             getData();
             forceAngle();
