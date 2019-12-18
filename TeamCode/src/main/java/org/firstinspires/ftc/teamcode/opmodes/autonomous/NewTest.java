@@ -58,7 +58,7 @@ public class NewTest extends LinearOpMode {
     private DcMotor liftRight;
     // only for elevator right motor
     private DcMotor liftLeft;
-    int i = 0;
+    int i;
     // only for elevator left motor
 //
 //    private Servo grabRight;
@@ -83,6 +83,9 @@ public class NewTest extends LinearOpMode {
         bot.driveTrain.init(hardwareMap);
 
         bot.foundationGrabber.init(hardwareMap);
+
+        backupGyro1 = hardwareMap.get(BNO055IMU.class,"imu1");
+        backupGyro1.initialize(new BNO055IMU.Parameters());
 
         left1 = hardwareMap.dcMotor.get("leftFront");
         left2 = hardwareMap.dcMotor.get("leftBack");
@@ -121,30 +124,72 @@ public class NewTest extends LinearOpMode {
 
         runtime.reset();
 
-        straightMovement(-12,-0.6);
 
 
+        bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,true);
+        bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,false);
 
-//            if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT), FoundationGrabber.Hook.LEFT)) {
-//                    sideToSide(-5, 0.6);
-//                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
-//            } else if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT), FoundationGrabber.Hook.RIGHT)) {
-//                    sideToSide(5, 0.6);
-//                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
-//
-//            } else {
-//                    sideToSide(-6, 0.6);
-//                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.LEFT, true);
-//            }
+        straightMovement(-15,-0.6);
+
+            if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT), FoundationGrabber.Hook.LEFT)) {
+
+                    sideToSide(5, 0.6);
+
+                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+
+                    sleep(2000);
+
+                    i = 0;
+
+            } else if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT), FoundationGrabber.Hook.RIGHT)) {
+
+                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+
+                    sleep(2000);
+
+                    i = 1;
+            } else {
+                    sideToSide(12, 0.6);
+                    straightMovement(-2,0.5);
+
+                    bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+                    sleep(2000);
+
+                    i =2;
+            }
 
 
             straightMovement(8,0.5);
 
-            sideToSide(-60,0.8);
+            if(i == 0){
+                sideToSide(70,0.8);
 
-            bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
+                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
-            sideToSide(30,0.5);
+                sleep(2000);
+
+                sideToSide(-30,0.8);
+
+            }
+            else if(i ==1){
+                sideToSide(64,0.8);
+
+                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
+
+                sleep(2000);
+
+                sideToSide(-30,0.8);
+            }
+            else if(i == 2){
+                sideToSide(62,0.8);
+
+                bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
+
+                sleep(2000);
+
+                sideToSide(-30,0.8);
+            }
+
 
 
         //driveDistance(30,0,Direction.FORWARD);
@@ -201,7 +246,7 @@ public class NewTest extends LinearOpMode {
     double POWEROVERDISTANCEY = power / DistanceY; //SIDE TO SIDE MOVEMENT in
 
 
-    void straightMovement(int inches, double POWER) {
+    void straightMovement(double inches, double POWER) {
 
         // insert name of the right odometry wheel
         double tick = conversion * inches;
@@ -215,6 +260,7 @@ public class NewTest extends LinearOpMode {
                 telemetry.addData("left", left2.getCurrentPosition());
                 telemetry.update();
                 powerAll(POWER);
+                forceAngle();
             }
         }
         else{
@@ -222,6 +268,7 @@ public class NewTest extends LinearOpMode {
                 telemetry.addData("left", left2.getCurrentPosition());
                 telemetry.update();
                 powerAll(POWER);
+                forceAngle();
             }
         }
 
@@ -231,7 +278,7 @@ public class NewTest extends LinearOpMode {
     }
 
 
-    void sideToSide(int inches, double POWER) {
+    void sideToSide(double inches, double POWER) {
 
         double ticksMovement = conversion * inches;
 
@@ -245,6 +292,7 @@ public class NewTest extends LinearOpMode {
                 left2.setPower(POWER);
                 right1.setPower(POWER);
                 right2.setPower(-POWER);
+                forceAngle();
             }
         }else {
             while (ticksMovement < left2.getCurrentPosition()) {
@@ -252,9 +300,10 @@ public class NewTest extends LinearOpMode {
                 left2.setPower(-POWER);
                 right1.setPower(-POWER);
                 right2.setPower(POWER);
+                forceAngle();
             }
         }
-
+        //SATHVIK HERE IS COMMENT BETA
         powerAll(0);
         sleep(2000);
 
