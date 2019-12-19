@@ -12,16 +12,10 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesOrder;
 import org.firstinspires.ftc.robotcore.external.navigation.AxesReference;
 import org.firstinspires.ftc.teamcode.Robot;
-import org.firstinspires.ftc.teamcode.lib.MecanumDriveImpl;
-import org.firstinspires.ftc.teamcode.subsystems.DriveTrain;
 import org.firstinspires.ftc.teamcode.subsystems.FoundationGrabber;
-import org.westtorrancerobotics.lib.MecanumController;
-import org.westtorrancerobotics.lib.MecanumDrive;
 
-import static com.qualcomm.robotcore.util.ElapsedTime.Resolution;
-
-@Autonomous(name="NewTest", group="Linear Opmode")
-public class NewTest extends LinearOpMode {
+@Autonomous(name="NewTestRed", group="Linear Opmode")
+public class NewTestRed extends LinearOpMode {
 
     private ElapsedTime runtime = new ElapsedTime();
 
@@ -110,14 +104,13 @@ public class NewTest extends LinearOpMode {
 
         left2.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
 
+
         right1.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         right2.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
 
         intakeLeft.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         intakeRight.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-
-        waitForStart();
 
         telemetry.addData("hi",1);
         telemetry.update();
@@ -129,13 +122,17 @@ public class NewTest extends LinearOpMode {
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,true);
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,false);
 
-        straightMovement(-22,-0.6);
+
+        straightMovement(-15,0.6);
 
             if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT), FoundationGrabber.Hook.LEFT)) {
 
-                    sideToSide(5, 0.6);
+                    sideToSide(8, 0.6);
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+
+                    telemetry.addData("left",1);
+                    telemetry.update();
 
                     sleep(2000);
 
@@ -143,51 +140,59 @@ public class NewTest extends LinearOpMode {
 
             } else if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT), FoundationGrabber.Hook.RIGHT)) {
 
+                    sideToSide(4,0.6);
+
+                    telemetry.addData("right",1);
+                    telemetry.update();
+
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
 
                     sleep(2000);
 
                     i = 1;
             } else {
-                    sideToSide(12, 0.6);
 
+                    sideToSide(-5, 0.6);
+
+                    telemetry.addData("right",2);
+                    telemetry.update();
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
                     sleep(2000);
 
-                    i =2;
+                    i = 2;
             }
 
 
-            straightMovement(8,0.5);
+            straightMovement(6,0.5);
 
             if(i == 0){
-                sideToSide(70,0.8);
+                sideToSide(-70,0.8);
 
                 bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
                 sleep(2000);
 
-                sideToSide(-30,0.8);
+                sideToSide(30,0.8);
 
             }
             else if(i ==1){
-                sideToSide(64,0.8);
+                sideToSide(-64,0.8);
 
                 bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
                 sleep(2000);
 
-                sideToSide(-30,0.8);
+                sideToSide(30,0.8);
             }
             else if(i == 2){
-                sideToSide(62,0.8);
+                sideToSide(-62,0.8);
 
                 bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
                 sleep(2000);
 
-                sideToSide(-30,0.8);
+                sideToSide(30,0.8);
             }
 
 
@@ -259,7 +264,7 @@ public class NewTest extends LinearOpMode {
             while (left2.getCurrentPosition() > (int) tick) {
                 telemetry.addData("left", left2.getCurrentPosition());
                 telemetry.update();
-                powerAll(POWER);
+                powerAll(-POWER);
                 forceAngle();
             }
         }
