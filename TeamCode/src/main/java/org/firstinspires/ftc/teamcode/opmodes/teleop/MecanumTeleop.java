@@ -38,7 +38,6 @@ public class MecanumTeleop extends LinearOpMode {
     private CRServo outtakeRight;
 
     private Servo nubBig;
-    private Servo nubLittle;
 
     private Servo grabRight;
     private Servo grabLeft;
@@ -73,11 +72,10 @@ public class MecanumTeleop extends LinearOpMode {
         grabLeft = hardwareMap.servo.get("foundationHookLeft");
         grabRight = hardwareMap.servo.get("foundationHookRight");
 
-        nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
-        nubLittle = hardwareMap.get (Servo.class, "nubGrabLittle");
+        nubBig = hardwareMap.get(Servo.class, "nubGrabber");
 
-        outtakeLeft = hardwareMap.crservo.get("outtakeLeft");
-        outtakeRight = hardwareMap.crservo.get("outtakeRight");
+        outtakeLeft = hardwareMap.crservo.get("fourBarLeft");
+        outtakeRight = hardwareMap.crservo.get("fourBarRight");
 
         left1.setDirection(DcMotorSimple.Direction.REVERSE);
         left2.setDirection(DcMotorSimple.Direction.REVERSE);
@@ -130,7 +128,19 @@ public class MecanumTeleop extends LinearOpMode {
             if (gamepad2.right_bumper) {
                 intakeSpeed = 1;
             }
-            if (gamepad2.dpad_up) {leftMotor.setPower(.75); rightMotor.setPower(.75);} else if (gamepad2.dpad_down) {leftMotor.setPower(-.05); rightMotor.setPower(-.05);} else if (!isGrabbed) {leftMotor.setPower(0); rightMotor.setPower(0);} else {leftMotor.setPower(.33); rightMotor.setPower(.33);}
+            if (gamepad2.dpad_up) {
+                leftMotor.setPower(.75);
+                rightMotor.setPower(.75);
+            } else if (gamepad2.dpad_down) {
+                leftMotor.setPower(-.05);
+                rightMotor.setPower(-.05);
+            } else if (!isGrabbed) {
+                leftMotor.setPower(0);
+                rightMotor.setPower(0);
+            } else {
+                leftMotor.setPower(.33);
+                rightMotor.setPower(.33);
+            }
 
             if (gamepad2.dpad_right) {
                 outtakeSpeed = -.75;
@@ -158,7 +168,13 @@ public class MecanumTeleop extends LinearOpMode {
             telemetry.addData("gyro: ",backupGyro1.getAngularOrientation());
             telemetry.update();
         }
-        if (gamepad2.a) {nubBig.setPosition(.9); nubLittle.setPosition(.9); isGrabbed = true;} else if (gamepad2.b) {nubBig.setPosition(.4); nubLittle.setPosition(.4); isGrabbed = false;}
+        if (gamepad2.a) {
+            nubBig.setPosition(0);
+            isGrabbed = true;
+        } else if (gamepad2.b) {
+            nubBig.setPosition(0.48);
+            isGrabbed = false;
+        }
     }
 
     void setLeft2Power(double n){

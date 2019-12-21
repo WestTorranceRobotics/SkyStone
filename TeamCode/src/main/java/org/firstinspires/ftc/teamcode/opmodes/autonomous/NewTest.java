@@ -135,6 +135,13 @@ public class NewTest extends LinearOpMode {
 
                     sideToSide(5, 0.6);
 
+                    sleep(1000);
+
+                    straightMovement(-4,0.5);
+
+
+                    sleep(1000);
+
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
 
                     sleep(2000);
@@ -142,6 +149,10 @@ public class NewTest extends LinearOpMode {
                     i = 0;
 
             } else if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT), FoundationGrabber.Hook.RIGHT)) {
+
+                    straightMovement(-4,0.5);
+
+                    sleep(1000);
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
 
@@ -151,8 +162,14 @@ public class NewTest extends LinearOpMode {
             } else {
                     sideToSide(12, 0.6);
 
+                    sleep(2000);
+
+                    straightMovement(-4,0.5);
+
+                    sleep(1000);
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
+
                     sleep(2000);
 
                     i =2;

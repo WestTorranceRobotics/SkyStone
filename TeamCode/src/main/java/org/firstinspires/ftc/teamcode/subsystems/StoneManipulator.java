@@ -1,6 +1,7 @@
 package org.firstinspires.ftc.teamcode.subsystems;
 import com.qualcomm.robotcore.hardware.CRServo;
 import com.qualcomm.robotcore.hardware.DcMotor;
+import com.qualcomm.robotcore.hardware.DcMotorSimple;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.TouchSensor;
@@ -16,18 +17,15 @@ import com.qualcomm.robotcore.hardware.TouchSensor;
  **/
 public class StoneManipulator {
     private static StoneManipulator instance = null;
-    // limits maximum movement of extender
-    //private CRServo outtakeRight;
-    //private CRServo outtakeLeft;
+
+    private CRServo outtakeRight;
+    private CRServo outtakeLeft;
     private boolean clasped;
-    private Servo nubBig;
-    private Servo nubLittle;
+    private Servo nubGrabber;
     private DcMotor rightIntake;
     private DcMotor leftIntake;
-    private final double FORWARD_GRABBER_CLASPED_POSITION = .4;
-    private final double FORWARD_GRABBER_UNCLASPED_POSITION = .9;
-    private final double BACKWARD_GRABBER_CLASPED_POSITION = .4;
-    private final double BACKWARD_GRABBER_UNCLASPED_POSITION = .9;
+    private final double GRABBER_CLASPED_POSITION = 0;
+    private final double GRABBER_UNCLASPED_POSITION = 0.48;
     private State currentState;
     public static synchronized StoneManipulator getInstance() {
         return instance != null ? instance : (instance = new StoneManipulator());
@@ -42,10 +40,12 @@ public class StoneManipulator {
     public void init(HardwareMap hardwareMap) {
         rightIntake = hardwareMap.get(DcMotor.class, "intakeRight/odometerRightY");
         leftIntake = hardwareMap.get(DcMotor.class, "intakeLeft/odometerLeftY");
-        //nubBig = hardwareMap.get(Servo.class, "nubGrabBig");
-        //nubLittle = hardwareMap.get (Servo.class, "nubGrabLittle");
+        nubGrabber = hardwareMap.get(Servo.class, "nubGrabber");
+        outtakeLeft = hardwareMap.get(CRServo.class, "fourBarLeft");
+        outtakeRight = hardwareMap.get(CRServo.class, "fourBarRight");
 
         leftIntake.setDirection(DcMotor.Direction.REVERSE);
+        rightIntake.setDirection(DcMotorSimple.Direction.REVERSE);
     }
   
     /**
@@ -69,28 +69,15 @@ public class StoneManipulator {
      *
      *
      * if intaking, return intaking, otherwise return extended lest power is 0
-     * @param extended
      * @return
      */
-    public State setExtended (boolean extended) {
-       /* if (currentState == State.INTAKING) {return currentState;}
-        double power = 1;
-        power = (!extended) ? -power : power;
-        outtakeRight.setPower(power);
-        outtakeLeft.setPower(power);
-        while (power != 0) {
-            outtakeRight.setPower (extenderForwardLimit.isPressed() ? 0 : extenderReverseLimit.isPressed() ? 0 : power);
-            outtakeLeft.setPower (extenderForwardLimit.isPressed() ? 0 : extenderReverseLimit.isPressed() ? 0 : power);
-        }
-        currentState = (power !=0) ? State.EXTENDED: (power == 0) ? State.RESTING : currentState;*/
+    public State setFourBarSpeed (double speed) {
+        outtakeLeft.setPower(speed);
+        outtakeRight.setPower(speed);
         return currentState;
      } public boolean setGrabbed (boolean grabbed) {
-       double positionArmBig = grabbed ? FORWARD_GRABBER_CLASPED_POSITION : FORWARD_GRABBER_UNCLASPED_POSITION;
-       double positionArmLittle = grabbed ? BACKWARD_GRABBER_CLASPED_POSITION : BACKWARD_GRABBER_UNCLASPED_POSITION;
-       clasped = (grabbed) ? true : false;
-        nubBig.setPosition(positionArmBig);
-        nubLittle.setPosition(positionArmLittle);
-        return clasped;
+        nubGrabber.setPosition(grabbed ? GRABBER_CLASPED_POSITION : GRABBER_UNCLASPED_POSITION);
+        return grabbed;
     } public State getState() {
         return currentState;
     } public boolean isGrabbed () {

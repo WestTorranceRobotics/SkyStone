@@ -123,11 +123,15 @@ public class NewTestRed extends LinearOpMode {
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,false);
 
 
-        straightMovement(-15,0.6);
+        straightMovement(-22,0.6);
 
             if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT), FoundationGrabber.Hook.LEFT)) {
 
                     sideToSide(8, 0.6);
+
+                    sleep(1000);
+
+                    straightMovement(3,0.6);
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
 
@@ -142,6 +146,10 @@ public class NewTestRed extends LinearOpMode {
 
                     sideToSide(4,0.6);
 
+                    sleep(1000);
+
+                    straightMovement(3,0.6);
+
                     telemetry.addData("right",1);
                     telemetry.update();
 
@@ -153,6 +161,10 @@ public class NewTestRed extends LinearOpMode {
             } else {
 
                     sideToSide(-5, 0.6);
+
+                    sleep(1000);
+
+                    straightMovement(3,0.6);
 
                     telemetry.addData("right",2);
                     telemetry.update();
