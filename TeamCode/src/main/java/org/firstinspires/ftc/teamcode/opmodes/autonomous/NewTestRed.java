@@ -176,9 +176,10 @@ public class NewTestRed extends LinearOpMode {
             }
 
 
-            straightMovement(6,0.5);
+            straightMovement(8,0.5);
 
             if(i == 0){
+
                 sideToSide(-70,0.8);
 
                 bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
