@@ -115,68 +115,60 @@ public class NewTestRed extends LinearOpMode {
         telemetry.addData("hi",1);
         telemetry.update();
 
-        runtime.reset();
-
-
+        start();
 
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,true);
         bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT,false);
 
 
-        straightMovement(-22,0.6);
+        straightMovement(-16,0.6);
 
             if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.LEFT), FoundationGrabber.Hook.LEFT)) {
 
-                    sideToSide(8, 0.6);
-
-                    sleep(1000);
-
-                    straightMovement(3,0.6);
+                    straightMovement(-3,0.6);
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
 
                     telemetry.addData("left",1);
                     telemetry.update();
 
-                    sleep(2000);
+                    sleep(1000);
 
                     i = 0;
 
-            } else if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT), FoundationGrabber.Hook.RIGHT)) {
+            } else if (seeing(bot.foundationGrabber.getDistance(FoundationGrabber.Hook.RIGHT), FoundationGrabber.Hook.RIGHT)){
 
-                    sideToSide(4,0.6);
+                    sideToSide(-8,0.5);
 
-                    sleep(1000);
-
-                    straightMovement(3,0.6);
+                    straightMovement(-3,0.6);
 
                     telemetry.addData("right",1);
                     telemetry.update();
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
 
-                    sleep(2000);
+                    sleep(1000);
 
                     i = 1;
             } else {
 
-                    sideToSide(-5, 0.6);
+                    sideToSide(-14, 0.6);
 
                     sleep(1000);
 
-                    straightMovement(3,0.6);
+                    straightMovement(-3,0.6);
 
                     telemetry.addData("right",2);
                     telemetry.update();
 
                     bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.RIGHT, true);
-                    sleep(2000);
+                    sleep(1000);
 
                     i = 2;
             }
 
 
-            straightMovement(8,0.5);
+            straightMovement(14,0.5);
 
             if(i == 0){
 
@@ -184,7 +176,7 @@ public class NewTestRed extends LinearOpMode {
 
                 bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
-                sleep(2000);
+                sleep(1000);
 
                 sideToSide(30,0.8);
 
@@ -194,7 +186,7 @@ public class NewTestRed extends LinearOpMode {
 
                 bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
-                sleep(2000);
+                sleep(1000);
 
                 sideToSide(30,0.8);
             }
@@ -203,10 +195,15 @@ public class NewTestRed extends LinearOpMode {
 
                 bot.foundationGrabber.setGrabbed(FoundationGrabber.Hook.BOTH,false);
 
-                sleep(2000);
+                sleep(1000);
 
                 sideToSide(30,0.8);
             }
+
+
+            bot.foundationGrabber.leftEye.enableLed(false);
+            bot.foundationGrabber.rightEye.enableLed(false);
+
 
 
 
@@ -446,16 +443,16 @@ public class NewTestRed extends LinearOpMode {
     }
 
     private void forceAngle () {
-        while ((currentAngle > 5 || currentAngle < -5) && opModeIsActive()) {
+        while ((currentAngle > 3 || currentAngle < -3) && opModeIsActive()) {
             if (!opModeIsActive()) {return;}
             currentAngle = backupGyro1.getAngularOrientation(AxesReference.INTRINSIC, AxesOrder.ZYX, AngleUnit.DEGREES).firstAngle;
-            if (currentAngle > 5 && opModeIsActive()) {
+            if (currentAngle > 3 && opModeIsActive()) {
                 left1.setPower(.25);
                 left2.setPower(.25);
                 right1.setPower(-.25);
                 right2.setPower(-.25);
             } else if
-            (currentAngle < -5 && opModeIsActive()) {
+            (currentAngle < -3 && opModeIsActive()) {
                 left1.setPower(-.25);
                 left2.setPower(-.25);
                 right1.setPower(.25);

@@ -13,10 +13,10 @@ public class FoundationGrabber {
 
     private Servo leftHook;
     private RevTouchSensor leftBlock;
-    private RevColorSensorV3 leftEye;
+    public RevColorSensorV3 leftEye;
     private Servo rightHook;
     private RevTouchSensor rightBlock;
-    private RevColorSensorV3 rightEye;
+    public RevColorSensorV3 rightEye;
 
     private RevTouchSensor frontTouch;
     private RevTouchSensor sideTouch;
